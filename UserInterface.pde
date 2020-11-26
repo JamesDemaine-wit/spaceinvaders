@@ -54,10 +54,10 @@ public class UserInterface {
     fill(255, 0, 0);
     text("SCORE: "+ score, 10, 24);
     text("LIVES: "+ defender.getLives(), 10, 48);
-    if (sounds.musicMuted) {
+    if (sounds.getMusicMuted()) {
       text("MUSIC: OFF - Press M to turn on.", 10, 72);
     }
-    if (!sounds.musicMuted) {
+    if (!sounds.getMusicMuted()) {
       text("MUSIC: ON - Press M to turn off.", 10, 72);
     }
     if (score>=500*buyCounter && defender.getLives()<defender.getMaxLives()) {

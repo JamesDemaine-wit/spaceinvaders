@@ -17,8 +17,6 @@ import javax.swing.*;
 // Learnt this the hard way when testing for open ports using and app on my cellphone.
 //I used the minecraft port, since it is well known by ISP's and won't be likely to get blocked.
 
-//public class SpaceInvaders extends PApplet {
-
 Multiplayer multiplayer;
 int buyCounter, score, numberOfAliens, port;
 String serverIP, negotiate, externalIP;
@@ -159,10 +157,10 @@ void keyReleased() {
     instance.gc(); //F9 acts as a garbage collector. used when resolving audio issues
   }
   if (keyCode == 77) {
-    if (sounds.musicMuted) {
-      sounds.musicMuted = false;
+    if (sounds.getMusicMuted()) {
+      sounds.setMusicMuted(false);
     } else {
-      sounds.musicMuted = true;
+      sounds.setMusicMuted(true);
       sounds.gameMusic.stop();
     }
   }

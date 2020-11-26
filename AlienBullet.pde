@@ -110,11 +110,20 @@ public class AlienBullet {
   }
 
   private boolean shouldTheBulletFire() {
-    if (((parentAlienXLive <= defender.defenderX+50 
-      && parentAlienXLive >= defender.defenderX-50) || (Math.random()>=0.99))
+    if (((parentAlienXLive <= defender.getDefenderX()+50 
+      && parentAlienXLive >= defender.getDefenderX()-50) || (Math.random()>=0.99))
       && !firing 
       && !parentAlienDeath) {
       return true;
+    } else if (defenderTwo != null) {
+      if (((parentAlienXLive <= defenderTwo.getDefenderX()+50 
+        && parentAlienXLive >= defenderTwo.getDefenderX()-50) || (Math.random()>=0.99))
+        && !firing 
+        && !parentAlienDeath) {
+        return true;
+      } else {
+        return false;
+      }
     } else { 
       return false;
     }
@@ -160,25 +169,29 @@ public class AlienBullet {
   }
 
   private boolean didBulletHitPlayerTwo() {
-    if (isMultiplayer 
-      && defenderTwo !=null 
-      && alienBulletY<= defenderTwo.defenderY -40 
-      && alienBulletY >= defenderTwo.defenderY -48 
-      && alienBulletX >= defenderTwo.defenderX - 48 
-      && alienBulletX <= defenderTwo.defenderX +48 
-      && !hitPlayer && defenderTwo.isVisible) {
-      return true;
+    if (defenderTwo !=null) {
+      if (alienBulletY<= defenderTwo.getDefenderY() -40 
+        && alienBulletY >= defenderTwo.getDefenderY() -48 
+        && alienBulletX >= defenderTwo.getDefenderX() - 48 
+        && alienBulletX <= defenderTwo.getDefenderX() +48 
+        && !hitPlayer 
+        && defenderTwo.getIsVisible()) {
+        return true;
+      } else {
+        return false;
+      }
     } else { 
       return false;
     }
   }
 
   private boolean didBulletHitPlayerOne() {
-    if (alienBulletY<= defender.defenderY -40 
-      && alienBulletY >= defender.defenderY -48 
-      && alienBulletX >= defender.defenderX - 48 
-      && alienBulletX <= defender.defenderX +48 
-      && !hitPlayer && defender.isVisible) {
+    if (alienBulletY <= defender.getDefenderY() -40 //only an 8 pixel window of detection. chance of missing?
+      && alienBulletY >= defender.getDefenderY() -48 
+      && alienBulletX >= defender.getDefenderX() - 48 
+      && alienBulletX <= defender.getDefenderX() +48 
+      && !hitPlayer 
+      && defender.getIsVisible()) {
       return true;
     } else { 
       return false;

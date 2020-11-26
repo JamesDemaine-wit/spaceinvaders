@@ -24,7 +24,6 @@ Name : James Demaine
      boolean areAliensAllDead() {
         boolean areAllDead = false;
        for (Alien a : aliens) {
-         a.drawAlienShip(a.alienX,a.alienY+5);
          if(a.alienDeath){
             areAllDead = true;
           }
