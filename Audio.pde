@@ -76,7 +76,7 @@ public class Audio {
     }
   }
 
-  public void hostGameScreenSound() {
+  public void multiplayerGameScreenSound() {
     if (dialupSound.isPlaying()) {
       dialupSound.stop();
     }

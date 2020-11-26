@@ -15,29 +15,30 @@ public class Multiplayer {
 
   public void runMultiplayer() {//multiplayer menu screen behaviour.
     if (isHost) {
-      server();
       if (connected) {
         if (defenderTwo == null) {
-          defenderTwo = new Defender();//create player two (client is player two)
+          defenderTwo = new Defender(true);//create player two (client is player two)
         }
-        sounds.hostGameScreenSound();
+        sounds.multiplayerGameScreenSound();
         userInterface.gameScreen();
       } else {
         userInterface.waitingForClient();
         sounds.waitingSound();
       }
+      server();
     }
     if (isClient) {
-      client();
       if (connected) {
         if (defenderTwo == null) {
-          defenderTwo = new Defender();//create player one (server is player one)
+          defenderTwo = new Defender(true);//create player one (server is player one)
         }
+        sounds.multiplayerGameScreenSound();
         userInterface.gameScreenClient();
       } else {
         userInterface.waitingForServer();
         sounds.waitingSound();
       }
+      client();
     }
   }
 
@@ -159,7 +160,10 @@ public class Multiplayer {
     dataToSend = dataToSend.concat(defender.getHitCooldown() + " ");//index 12
     dataToSend = dataToSend.concat(defender.getIsVisible() + " ");//index 13
     dataToSend = dataToSend.concat(defender.getTargetHit() + " ");//index 14
-    dataToSend = dataToSend.concat("end.clientplayer ");//index 15
+    dataToSend = dataToSend.concat(defender.bullet.getBulletX()/displayWidth + " "); //index 15
+    dataToSend = dataToSend.concat(defender.bullet.getBulletY()/displayHeight + " "); //index 16
+    dataToSend = dataToSend.concat(defender.bullet.getFire() + " "); //index 17
+    dataToSend = dataToSend.concat("end.clientplayer ");//index 18
     correctNumberOfAliens(); // forces a recheck of how many aliens there should be to maintain sync between client and server
     //As a new alien may not have been created yet or an old alien may not have been removed
     return dataToSend;
@@ -224,6 +228,9 @@ public class Multiplayer {
     int clientDefenderHitCooldown = defenderTwo.getHitCooldown();
     boolean clientDefenderIsVisible = defenderTwo.getIsVisible();
     boolean clientDefenderTargetHit = defenderTwo.getTargetHit();
+    float clientBulletX = defenderTwo.bullet.getBulletX();
+    float clientBulletY = defenderTwo.bullet.getBulletY();
+    boolean clientBulletFire = defenderTwo.bullet.getFire();
     //split the client data
     dataReceived = rawDataReceived.split(" ");
     if (debug) {
@@ -233,7 +240,7 @@ public class Multiplayer {
     if (dataReceived[0] == "begin.main " 
       && dataReceived[8] == "end.main " 
       && dataReceived[9] == "\nbegin.clientplayer "
-      && dataReceived[15] == "end.clientplayer ") {
+      && dataReceived[18] == "end.clientplayer ") {
       dataIntegrity = true;
       //save data to local variables
       clientLives = int(dataReceived[1]);
@@ -248,6 +255,9 @@ public class Multiplayer {
       clientDefenderHitCooldown = int(dataReceived[12]);
       clientDefenderIsVisible = boolean(dataReceived[13]);
       clientDefenderTargetHit = boolean(dataReceived[14]);
+      clientBulletX = float(dataReceived[15]);
+      clientBulletY = float(dataReceived[16]);
+      clientBulletFire = boolean(dataReceived[17]);
     }
     if (dataIntegrity) {
       if (clientLives<defenderTwo.getLives()) {
@@ -267,6 +277,9 @@ public class Multiplayer {
       defenderTwo.setHitCoolDown(clientDefenderHitCooldown);
       defenderTwo.setIsVisible(clientDefenderIsVisible);
       defenderTwo.setTargetHit(clientDefenderTargetHit);
+      defenderTwo.bullet.setBulletX(clientBulletX);
+      defenderTwo.bullet.setBulletY(clientBulletY);
+      defenderTwo.bullet.setFire(clientBulletFire);
     } else {
       println("Received garbage when parsing client data.");
     }

@@ -15,30 +15,28 @@ public class UserInterface {
     debug();
   }
 
-  void singleplayerUISelector() {
+  void singlePlayerUI() {
     if (!isMultiplayer) {
       if (menu) {
         menuScreen();//main menu screen
       } else {
         gameScreen();//singleplayer game
+        textAlign(LEFT);
+        textSize(14);
+        fill(255);
+        text(multiplayer.generateClientData(), 0, displayHeight/2);
       }
     }
   }
 
-  void multiplayerUISelector() {
-    if (isMultiplayer) {
-      if (menu && !(isHost || isClient)) {
-        drawMultiplayerScreen();
-      }
-      if (isHost && !isClient) {//hosting the game
-        //drawHostGameScreen();
-        multiplayer.runMultiplayer();
-      } else if (!isHost && isClient) {//joining the game
-        //drawClientGameScreen();
-        multiplayer.runMultiplayer();
-      }
+  void multiplayerUI() {
+    if (isMultiplayer && menu && !(isHost || isClient)) {
+      drawMultiplayerScreen();
+    } else if ( isMultiplayer && (isHost || isClient)) {
+      multiplayer.runMultiplayer();
     }
   }
+
 
   void quitGame() {
     sounds.playDeathSound = false;

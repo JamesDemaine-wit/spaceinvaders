@@ -1,5 +1,6 @@
 public class Images {
   PImage defenderShipAsset;
+  PImage defenderShipAssetPlayerTwo;
   PImage shieldAsset;
   PImage backgroundAsset;
   PImage playButtonAsset;
@@ -22,6 +23,7 @@ public class Images {
 
   Images() {
     defenderShipAsset = loadImage("assets/defenderShipAsset.png");
+    defenderShipAssetPlayerTwo = loadImage("assets/defenderShipAssetPlayerTwo.png");
     shieldAsset = loadImage("assets/shieldAsset.png");
     backgroundAsset = loadImage("assets/background.png");
     playButtonAsset = loadImage("assets/playButtonAsset.png");

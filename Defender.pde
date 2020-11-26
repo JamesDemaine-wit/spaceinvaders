@@ -2,11 +2,31 @@ public class Defender {
 
   private float defenderX, defenderY;
   private int hitCooldown, lives, maxLives;
-  private boolean isVisible, targetHit;
+  private boolean isVisible, targetHit, isPlayerTwo;
   public Bullet bullet;
 
   public Defender() {
     bullet = new Bullet();
+    this.isPlayerTwo = false;
+    if (isClient && multiplayer.connected) {
+      defenderX = 3*(displayWidth/4);
+    }
+    if (isHost && multiplayer.connected) {
+      defenderX = displayWidth/4;
+    } else {
+      defenderX = displayWidth/2;
+    }
+    defenderY= displayHeight-(displayHeight/8);
+    hitCooldown = 0;
+    isVisible = true;
+    targetHit = false;
+    lives = 3;
+    maxLives = 3;
+  }
+  
+  public Defender(boolean isPlayerTwo) {
+    bullet = new Bullet();
+    this.isPlayerTwo = isPlayerTwo;
     if (isClient && multiplayer.connected) {
       defenderX = 3*(displayWidth/4);
     }
@@ -32,20 +52,19 @@ public class Defender {
   }
 
   private void drawDefender() {
-    if (isMultiplayer) {
+    if (isPlayerTwo) {
       if (isVisible) {
         imageMode(CENTER);
-        image(images.defenderShipAsset, defenderX, defenderY, 96, 96);
+        image(images.defenderShipAssetPlayerTwo, defenderX, defenderY, 96, 96);
       }
       if (!isVisible) {
         imageMode(CENTER);
         tint(255, 128);
-        image(images.defenderShipAsset, defenderX, defenderY, 96, 96);
+        image(images.defenderShipAssetPlayerTwo, defenderX, defenderY, 96, 96);
         tint(255, 255);
         image(images.shieldAsset, defenderX, defenderY, 128, 128);
       }
-    }
-    if (!isMultiplayer) {
+    } else {
       defenderX = mouseX;
       defenderY= displayHeight-(displayHeight/8);
       if (isVisible) {

@@ -63,11 +63,10 @@ void setup() {
   }
   sounds = new Audio();
 }
-//selectors to find out which screen to draw
 
 void draw() {
-  userInterface.singleplayerUISelector();
-  userInterface.multiplayerUISelector();
+  userInterface.singlePlayerUI();
+  userInterface.multiplayerUI();
   userInterface.freezeScreenUnfocused();
 }
 
@@ -83,8 +82,6 @@ void correctNumberOfAliens() {
     }
   }
 }
-
-
 
 void buyLivesWithScore() {
   if (score>=500*buyCounter && defender.getLives()<defender.getMaxLives()) {
@@ -117,7 +114,7 @@ void resetToMenu() {
   delay(500);
 }
 
-boolean areAliensAllDead() { // Source: Michael Gerber :-)
+boolean areAliensAllDead() { // Source: Michael Gerber - see readme)
   for (Alien a : aliens) {
     //"The way I did it, it will cycle through the list and as soon as one is alive,
     //it will return false and stop the whole for loop and ignore the rest of the list (Better optimized for large lists)"
@@ -154,7 +151,7 @@ void keyReleased() {
     }
   }
   if (keyCode == 105) {
-    instance.gc(); //F9 acts as a garbage collector. used when resolving audio issues
+    instance.gc(); //F9 acts as a garbage collector. I used this when resolving audio issues
   }
   if (keyCode == 77) {
     if (sounds.getMusicMuted()) {
