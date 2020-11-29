@@ -116,7 +116,7 @@ public class Audio {
   }
 
   void menuMusic() {
-    if (menu && !menuMusic.isPlaying()) {
+    if (menu && !menuMusic.isPlaying() && !musicMuted) {
       menuMusic.loop();
     }
   }

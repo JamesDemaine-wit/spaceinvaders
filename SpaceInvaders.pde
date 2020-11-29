@@ -1,9 +1,15 @@
+import uibooster.*;
+import uibooster.components.*;
+import uibooster.model.*;
+import uibooster.model.formelements.*;
+import uibooster.utils.*;
 import processing.net.*;
 import processing.sound.*;
 import java.time.*;
 import com.dosse.upnp.*;
 import javax.swing.*;
-//third party libraries:
+import java.util.regex.*;
+//third party/non-processing libraries:
 //WaifUPnP  Source: https://github.com/adolfintel/WaifUPnP
 //Only change I made to the jar file was including "this" in the class path of the manifest. 
 //(I am not certain, but I believe this is to reference the parent class of the jar file)

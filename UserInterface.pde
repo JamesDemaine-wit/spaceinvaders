@@ -1,9 +1,11 @@
 public class UserInterface {
 
   boolean soundPlayed;
+  boolean inputMode;
 
   UserInterface() {
     soundPlayed = false;// prevents looping of ui sound
+    inputMode = false;//is the user inputting text?
   }
 
   void drawMultiplayerScreen() {
@@ -222,14 +224,56 @@ public class UserInterface {
       //isClient = true;
       if (!sounds.errorSound.isPlaying()) {
         sounds.errorSound.play();
-        //askForServerAddress();
       }
+      sounds.menuMusic.stop();
+      askForAddress();
+      fullScreen(P2D);
+      loop();
       textAlign(LEFT);
       textSize(24);
       fill(255, 0, 0);
       text("Almost ready!", displayWidth/2+155, displayHeight/2);
     }
   }
+
+  void inputErrorMessage(String message) {
+    new UiBooster().showErrorDialog(message, "ERROR");
+  }
+
+  //https://www.javatpoint.com/java-regex
+  void askForAddress() {
+    String userInput = new UiBooster().showTextInputDialog("Enter Server IP:");
+    if (userInput == null) {
+      inputErrorMessage("You need to enter an IP address to play online.");
+      returnToMultiplayerMenu();
+    } else if (userInput.length()>15) {
+      inputErrorMessage("Input too long!");
+      askForAddress();
+      return;
+    } else if (userInput.contains(".")) {
+      String[] sections = userInput.split("\\D", 4);//only checks non-digits, hence contains method above
+      for (String s : sections) {
+        //regex support for hostnames in future?
+        boolean match = Pattern.matches("\\d{3}",s);
+        boolean match2 = Pattern.matches("\\d{2}",s);
+        boolean match3 = Pattern.matches("\\d{1}",s);
+        if (!match && !match2 && !match3) {
+          inputErrorMessage("That was not a valid IP address.");
+          askForAddress();
+          return;
+        }
+      }
+      serverIP = userInput;
+      println("User connecting to IP: "+userInput);
+      //askForPort();
+    } else {
+      inputErrorMessage("That was not an IP address.");
+      println(userInput);
+      askForAddress();
+      return;
+    }
+  }
+
 
   void drawBackButton() {
     if (drawButton(images.backButtonAsset, images.backButtonAssetHighlighted, displayWidth/2, displayHeight/2+125, 300, 100)) {
