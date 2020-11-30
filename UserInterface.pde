@@ -227,7 +227,7 @@ public class UserInterface {
       }
       sounds.menuMusic.stop();
       askForAddress();
-      //askForPort();
+      //askForPort();//Not going to ask for port, use 25565 always.
       fullScreen(P2D);
       loop();
       textAlign(LEFT);
@@ -238,11 +238,21 @@ public class UserInterface {
   }
 
   void inputErrorMessage(String message) {
-    JOptionPane.showMessageDialog(null,message);
+    JOptionPane.showMessageDialog(null, message);
   }
 
   void askForAddress() {
-    String userInput = JOptionPane.showInputDialog(null,"Enter Server IP:", "127.0.0.1");
+    //Using: https://stackoverflow.com/questions/39107750/java-and-processing-3-0-frame-class-deprecated-is-there-an-alternative
+    //casting PSurface window to OpenGL window and saving to GLWindow object type, to call its methods.
+    com.jogamp.newt.opengl.GLWindow window = (com.jogamp.newt.opengl.GLWindow)(((PSurfaceJOGL)surface).getNative());
+    noLoop();//prevents trying to draw while the window is not being displayed
+    window.setVisible(false);//hide the window
+    String userInput = JOptionPane.showInputDialog(null, "Enter Server IP:", "127.0.0.1");//request the IP
+    window.setVisible(true);//display the window
+    window.requestFocus();
+    loop();//continues drawing
+    //parent.getSurface().setVisible(true);
+    //parent.start();
     if (userInput == null) {
       inputErrorMessage("You need to enter an IP address to play online.");
       returnToMultiplayerMenu();
@@ -254,10 +264,10 @@ public class UserInterface {
       String[] sections = userInput.split("\\D", 4);//only checks non-digits, assuming '.' as the non digits
       for (String s : sections) {
         //regex support for hostnames in future?
-        boolean match = Pattern.matches("\\d{3}",s);//any digit 0-9, length of 3
-        boolean match2 = Pattern.matches("\\d{2}",s);// "", length of 2
-        boolean match3 = Pattern.matches("\\d{1}",s);//"", length of 1
-        if (!(match && match2 && match3)) {
+        boolean match3 = Pattern.matches("\\d{3}", s);//any digit 0-9, length of 3
+        boolean match2 = Pattern.matches("\\d{2}", s);//    ""       , length of 2
+        boolean match1 = Pattern.matches("\\d{1}", s);//    ""        , length of 1
+        if (!match3 && !match2 && !match1) {
           inputErrorMessage("That was not a valid IP address.");
           askForAddress();
           return;
@@ -272,7 +282,52 @@ public class UserInterface {
       return;
     }
   }
+  
+  //Opted to use a single port.
 
+  //void askForPort() {
+  //  //Mostly the same as askForAddress() method.
+    
+  //  //Using: https://stackoverflow.com/questions/39107750/java-and-processing-3-0-frame-class-deprecated-is-there-an-alternative
+  //  //casting PSurface window to OpenGL window, to call its methods.
+  //  com.jogamp.newt.opengl.GLWindow window = (com.jogamp.newt.opengl.GLWindow)(((PSurfaceJOGL)surface).getNative());
+  //  noLoop();//prevents trying to draw while the window is not being displayed
+  //  window.setVisible(false);//hide the window
+  //  String userInput = JOptionPane.showInputDialog(null, "Enter Server port:", "25565");//request the port
+  //  window.setVisible(true);//display the window
+  //  window.requestFocus();
+  //  loop();//continues drawing
+  //  //parent.getSurface().setVisible(true);
+  //  //parent.start();
+  //  if (userInput == null) {
+  //    inputErrorMessage("You need to enter an port to play online.");
+  //    returnToMultiplayerMenu();
+  //  } else if (userInput.length()>5) {
+  //    inputErrorMessage("Input too long!");
+  //    askForPort();
+  //    return;//return is to prevent the rest of the first instance of the method from continuing if it is called again
+  //  } else if (Pattern.matches("\\d{5}") {//looks similar to an IP?
+  //    String[] sections = userInput.split("\\D", 4);//only checks non-digits, assuming '.' as the non digits
+  //    for (String s : sections) {
+  //      //regex support for hostnames in future?
+  //      boolean match3 = Pattern.matches("\\d{3}", s);//any digit 0-9, length of 3
+  //      boolean match2 = Pattern.matches("\\d{2}", s);//    ""       , length of 2
+  //      boolean match1 = Pattern.matches("\\d{1}", s);//    ""        , length of 1
+  //      if (!match3 && !match2 && !match1) {
+  //        inputErrorMessage("That was not a valid port.");
+  //        askForPort();
+  //        return;
+  //      }
+  //    }
+  //    serverIP = userInput;
+  //    println("User connecting to IP: "+userInput);
+  //  } else {
+  //    inputErrorMessage("That was not an IP address.");
+  //    println(userInput);
+  //    askForAddress();
+  //    return;
+  //  }
+  //}
 
   void drawBackButton() {
     if (drawButton(images.backButtonAsset, images.backButtonAssetHighlighted, displayWidth/2, displayHeight/2+125, 300, 100)) {

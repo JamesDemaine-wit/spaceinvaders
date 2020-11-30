@@ -1,4 +1,4 @@
-
+import java.awt.Frame;
 import processing.net.*;
 import processing.sound.*;
 import java.time.*;
@@ -39,7 +39,7 @@ void setup() {
   images = new Images();
   serverIP = "127.0.0.1";
   externalIP = UPnP.getExternalIP();
-  port = 25565;
+  port = 25565;//Using one port, no optional use of different port. new feature?
   fullScreen(P2D);//using the P2D renderer improves framerate, especially when scaling images to non-native resolutions.
   pixelDensity(displayDensity());//ensures compatibility accross different resolutions.
   frameRate(60);
