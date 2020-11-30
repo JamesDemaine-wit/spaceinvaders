@@ -1,8 +1,4 @@
-import uibooster.*;
-import uibooster.components.*;
-import uibooster.model.*;
-import uibooster.model.formelements.*;
-import uibooster.utils.*;
+
 import processing.net.*;
 import processing.sound.*;
 import java.time.*;

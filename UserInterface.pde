@@ -227,6 +227,7 @@ public class UserInterface {
       }
       sounds.menuMusic.stop();
       askForAddress();
+      //askForPort();
       fullScreen(P2D);
       loop();
       textAlign(LEFT);
@@ -237,27 +238,26 @@ public class UserInterface {
   }
 
   void inputErrorMessage(String message) {
-    new UiBooster().showErrorDialog(message, "ERROR");
+    JOptionPane.showMessageDialog(null,message);
   }
 
-  //https://www.javatpoint.com/java-regex
   void askForAddress() {
-    String userInput = new UiBooster().showTextInputDialog("Enter Server IP:");
+    String userInput = JOptionPane.showInputDialog(null,"Enter Server IP:", "127.0.0.1");
     if (userInput == null) {
       inputErrorMessage("You need to enter an IP address to play online.");
       returnToMultiplayerMenu();
     } else if (userInput.length()>15) {
       inputErrorMessage("Input too long!");
       askForAddress();
-      return;
-    } else if (userInput.contains(".")) {
-      String[] sections = userInput.split("\\D", 4);//only checks non-digits, hence contains method above
+      return;//return is to prevent the rest of the first instance of the method from continuing if it is called again
+    } else if (userInput.contains(".")) {//looks similar to an IP?
+      String[] sections = userInput.split("\\D", 4);//only checks non-digits, assuming '.' as the non digits
       for (String s : sections) {
         //regex support for hostnames in future?
-        boolean match = Pattern.matches("\\d{3}",s);
-        boolean match2 = Pattern.matches("\\d{2}",s);
-        boolean match3 = Pattern.matches("\\d{1}",s);
-        if (!match && !match2 && !match3) {
+        boolean match = Pattern.matches("\\d{3}",s);//any digit 0-9, length of 3
+        boolean match2 = Pattern.matches("\\d{2}",s);// "", length of 2
+        boolean match3 = Pattern.matches("\\d{1}",s);//"", length of 1
+        if (!(match && match2 && match3)) {
           inputErrorMessage("That was not a valid IP address.");
           askForAddress();
           return;
@@ -265,7 +265,6 @@ public class UserInterface {
       }
       serverIP = userInput;
       println("User connecting to IP: "+userInput);
-      //askForPort();
     } else {
       inputErrorMessage("That was not an IP address.");
       println(userInput);
