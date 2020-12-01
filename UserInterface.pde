@@ -36,10 +36,6 @@ public class UserInterface {
         menuScreen();//main menu screen
       } else {
         gameScreen();//singleplayer game
-        textAlign(LEFT);
-        textSize(14);
-        fill(255);
-        text(multiplayer.generateClientData(), 0, displayHeight/2);
       }
     }
   }
@@ -276,7 +272,7 @@ public class UserInterface {
     window.setVisible(false);//hide the window
     String userInput = JOptionPane.showInputDialog(null, "Enter Server IP:", "127.0.0.1");//request the IP
     window.setVisible(true);//display the window
-    window.requestFocus(true);
+    window.requestFocus();
     //window.requestFocus();
     //parent.getSurface().setVisible(true);
     //parent.start();
@@ -302,9 +298,7 @@ public class UserInterface {
       }
       serverIP = userInput;
       println("User connecting to IP: "+userInput);
-      //if(focused){
-      //  loop();//continues drawing
-      //}
+      loop();//resumes drawing
     } else {
       inputErrorMessage("That was not an IP address.");
       println(userInput);
