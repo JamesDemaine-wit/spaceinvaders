@@ -4,13 +4,15 @@ public class Multiplayer {
   private Client gameClient;
   private boolean connected;
   private String[] dataReceived;
-  private String clientIP;
-  private int openPortAttempts;
+  private String clientIP, negotiate;
+  private int openPortAttempts; 
 
+  //Constructor
   public Multiplayer() {
     connected = false;
     clientIP = "127.0.0.1";
     openPortAttempts = 0;
+    negotiate = null;//initialised to null, isn't the "magic" keyword that accepts the connection
   }
 
   public void runMultiplayer() {//multiplayer menu screen behaviour.
@@ -44,31 +46,28 @@ public class Multiplayer {
 
   private void negotiateConnectionServerSide() {
     negotiate = gameClient.readString();//save string
-    gameServer.write("SpaceInvaders");//tell the client server string
+    gameServer.write("SpaceInvaders");//tell the client servers string
     if (negotiate == "IamAclient") {//test string
       clientIP = gameClient.ip();
       println("Connection accepted by Server! Client IP is: "+ clientIP);
       connected = true;
       //this method should not be called again if this code ran
-    }
-    if (negotiate != "IamAclient" && negotiate != null) {
+    } else if (negotiate != "IamAclient" && negotiate != null) {
       println("Garbage received, resetting buffer. Received: "+ negotiate);
       gameClient.clear();
       clientIP = "127.0.0.1";
-      negotiate = "garbage received";
-    }
-    if (negotiate == null) {
+      negotiate = null;
+    } else if (negotiate == null) {
       println("Waiting for a client...");
-    } else { 
-      println("The server negotiation method was called again for no reason, check locations where it is called");
-      //already connected, why was this run?
     }
   }
 
 
   private void negotiateConnectionClientSide() {
-    negotiate = gameClient.readString();
-    gameClient.write("IamAclient");
+    if (gameClient.available()>0) {
+      negotiate = gameClient.readString();
+      gameClient.write("IamAclient");
+    }
     if (negotiate == "SpaceInvaders") {
       connected = true;
       println("Connection accepted by Server!");
@@ -76,6 +75,7 @@ public class Multiplayer {
       println("Garbage received, resetting buffer. Received: "+ negotiate);
       gameClient.clear();
       connected = false;
+      negotiate = null;
       println("Waiting.");
     } else if (negotiate == null) {
       connected = false;
@@ -86,14 +86,24 @@ public class Multiplayer {
 
   private void client() {
     if (gameClient != null) {
-      if (!connected) {//tell the server I am A client
-        negotiateConnectionClientSide();
+      if (!gameClient.active()) {
+        println("Don't mind the exception, processing net library won't let me catch it.");
+        gameClient = null;
       } else {
-        //parsReceivedServerData(gameClient.readString());
-        gameClient.write(generateClientData());
+        if (!connected) {//tell the server I am A client
+          negotiateConnectionClientSide();
+        } else {
+          println("writing data");
+          //parsReceivedServerData(gameClient.readString());
+          gameClient.write(generateClientData());
+        }
       }
     } else if ( gameClient == null) {
+      println("setup client");
       gameClient = new Client(parent, serverIP, port);
+      //Should throw an exception if the server refuses connection,
+      //library catches exception instead of throwing it. 
+      //rather annoying, so I have to check for the connection in the next loop cycle
     }
   }
 
@@ -160,9 +170,9 @@ public class Multiplayer {
     dataToSend = dataToSend.concat(defender.getHitCooldown() + " ");//index 12
     dataToSend = dataToSend.concat(defender.getIsVisible() + " ");//index 13
     dataToSend = dataToSend.concat(defender.getTargetHit() + " ");//index 14
-    dataToSend = dataToSend.concat(defender.bullet.getBulletX()/displayWidth + " "); //index 15
-    dataToSend = dataToSend.concat(defender.bullet.getBulletY()/displayHeight + " "); //index 16
-    dataToSend = dataToSend.concat(defender.bullet.getFire() + " "); //index 17
+    dataToSend = dataToSend.concat(defender.getBullet().getBulletX()/displayWidth + " "); //index 15
+    dataToSend = dataToSend.concat(defender.getBullet().getBulletY()/displayHeight + " "); //index 16
+    dataToSend = dataToSend.concat(defender.getBullet().getFire() + " "); //index 17
     dataToSend = dataToSend.concat("end.clientplayer ");//index 18
     correctNumberOfAliens(); // forces a recheck of how many aliens there should be to maintain sync between client and server
     //As a new alien may not have been created yet or an old alien may not have been removed
@@ -193,10 +203,10 @@ public class Multiplayer {
     for (Alien a : aliens) {//iterate through each alien and add their variables to the string
       //variable indexes, will have to test alien number of each list of strings
       dataToSend = dataToSend.concat("\nbegin.alien."+ a.getAlienNumber() + " ");
-      dataToSend = dataToSend.concat((a.alienBullet.getAlienBulletX()/displayWidth) + " ");
-      dataToSend = dataToSend.concat((a.alienBullet.getAlienBulletY()/displayHeight) + " ");
-      dataToSend = dataToSend.concat(a.alienBullet.getFiring() + " ");
-      dataToSend = dataToSend.concat(a.alienBullet.getHitPlayer() + " ");
+      dataToSend = dataToSend.concat((a.getAlienBullet().getAlienBulletX()/displayWidth) + " ");
+      dataToSend = dataToSend.concat((a.getAlienBullet().getAlienBulletY()/displayHeight) + " ");
+      dataToSend = dataToSend.concat(a.getAlienBullet().getFiring() + " ");
+      dataToSend = dataToSend.concat(a.getAlienBullet().getHitPlayer() + " ");
       dataToSend = dataToSend.concat(a.getAlienDeathState() + " ");
       dataToSend = dataToSend.concat((a.getAlienX()/displayWidth) + " ");
       dataToSend = dataToSend.concat((a.getAlienY()/displayHeight) + " ");
@@ -228,9 +238,9 @@ public class Multiplayer {
     int clientDefenderHitCooldown = defenderTwo.getHitCooldown();
     boolean clientDefenderIsVisible = defenderTwo.getIsVisible();
     boolean clientDefenderTargetHit = defenderTwo.getTargetHit();
-    float clientBulletX = defenderTwo.bullet.getBulletX();
-    float clientBulletY = defenderTwo.bullet.getBulletY();
-    boolean clientBulletFire = defenderTwo.bullet.getFire();
+    float clientBulletX = defenderTwo.getBullet().getBulletX();
+    float clientBulletY = defenderTwo.getBullet().getBulletY();
+    boolean clientBulletFire = defenderTwo.getBullet().getFire();
     //split the client data
     dataReceived = rawDataReceived.split(" ");
     if (debug) {
@@ -277,11 +287,57 @@ public class Multiplayer {
       defenderTwo.setHitCoolDown(clientDefenderHitCooldown);
       defenderTwo.setIsVisible(clientDefenderIsVisible);
       defenderTwo.setTargetHit(clientDefenderTargetHit);
-      defenderTwo.bullet.setBulletX(clientBulletX);
-      defenderTwo.bullet.setBulletY(clientBulletY);
-      defenderTwo.bullet.setFire(clientBulletFire);
+      defenderTwo.getBullet().setBulletX(clientBulletX);
+      defenderTwo.getBullet().setBulletY(clientBulletY);
+      defenderTwo.getBullet().setFire(clientBulletFire);
     } else {
       println("Received garbage when parsing client data.");
     }
+  }
+
+  //Setters:
+  public void setGameServer(Server gameServer) {
+    this.gameServer = gameServer;
+  }
+  public void setGameClient(Client gameClient) {
+    this.gameClient = gameClient;
+  }
+  public void setConnected(boolean connected) {
+    this.connected = connected;
+  }
+  public void setDataReceived(String[] dataReceived) {
+    this.dataReceived = dataReceived;
+  }
+  public void setClientIP(String clientIP) {
+    this.clientIP = clientIP;
+  }
+  public void setNegotiate(String negotiate) {
+    this.negotiate = negotiate;
+  }
+  public void setOpenPortAttempts(int openPortAttempts) {
+    this.openPortAttempts = openPortAttempts;
+  }
+
+  //Getters:
+  public Server getGameServer() {
+    return gameServer;
+  }
+  public Client getGameClient() {
+    return gameClient;
+  }
+  public boolean getConnected() {
+    return connected;
+  }
+  public String[] getDataReceived() {
+    return dataReceived;
+  }
+  public String getClientIP() {
+    return clientIP;
+  }
+  public String getNegotiate() {
+    return negotiate;
+  }
+  public int getOpenPortAttempts() {
+    return openPortAttempts;
   }
 }

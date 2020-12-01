@@ -1,4 +1,5 @@
 public class Audio {
+  //I made all audio into its own class to simplify finding audio bugs.
 
   public SoundFile gameMusic;
   public SoundFile bulletSound;
@@ -68,10 +69,9 @@ public class Audio {
     if (menu) {
       if (userInterface.shouldMenuSoundPlay() && !userInterface.soundPlayed) {
         menuButtonSound.play();
-
-        userInterface.soundPlayed = true;
+        userInterface.setSoundPlayed(true);
       } else if (!userInterface.shouldMenuSoundPlay()) {
-        userInterface.soundPlayed = false;
+        userInterface.setSoundPlayed(false);
       }
     }
   }
@@ -115,7 +115,7 @@ public class Audio {
     }
   }
 
-  void menuMusic() {
+  public void menuMusic() {
     if (menu && !menuMusic.isPlaying() && !musicMuted) {
       menuMusic.loop();
     }

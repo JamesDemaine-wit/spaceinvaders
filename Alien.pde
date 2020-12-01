@@ -4,7 +4,7 @@ public class Alien {
   private int hits, maxHits, alienNumber, deathFrame;
   private boolean directionIsRight, alienDeathState;
   private AlienBullet alienBullet;
-  private Object defenderThatWasHit, defenderThatHitTarget;
+  private Defender defenderThatWasHit, defenderThatHitTarget;
 
   //default constructor, i is the alien number passed from the main class.
   public Alien(int i) {
@@ -76,7 +76,7 @@ public class Alien {
 
 
   //Getters
-  public Object getAlienBullet() {
+  public AlienBullet getAlienBullet() {
     return alienBullet;
   }
   public float getAlienX() {
@@ -161,28 +161,28 @@ public class Alien {
 
   private boolean didBulletHitTarget() {
     if (defenderTwo == null) {
-      if (defender.bullet.getBulletX() >= alienX-45 
-        && defender.bullet.getBulletX() <= alienX+45 
-        && defender.bullet.getBulletY() >= alienY+14 
-        && defender.bullet.getBulletY() <= alienY+75 
+      if (defender.getBullet().getBulletX() >= alienX-45 
+        && defender.getBullet().getBulletX() <= alienX+45 
+        && defender.getBullet().getBulletY() >= alienY+14 
+        && defender.getBullet().getBulletY() <= alienY+75 
         && !alienDeathState) {
         return true;
       } else { 
         return false;
       }
     } else {
-      if (defender.bullet.getBulletX() >= alienX-45 
-        && defender.bullet.getBulletX() <= alienX+45 
-        && defender.bullet.getBulletY() >= alienY+14 
-        && defender.bullet.getBulletY() <= alienY+75 
+      if (defender.getBullet().getBulletX() >= alienX-45 
+        && defender.getBullet().getBulletX() <= alienX+45 
+        && defender.getBullet().getBulletY() >= alienY+14 
+        && defender.getBullet().getBulletY() <= alienY+75 
         && !alienDeathState) {
         defenderThatHitTarget = defender;
         return true;
       } 
-      if (defenderTwo.bullet.bulletX >= alienX-45 
-        && defenderTwo.bullet.getBulletX() <= alienX+45 
-        && defenderTwo.bullet.getBulletY() >= alienY+14 
-        && defenderTwo.bullet.getBulletY() <= alienY+75 
+      if (defenderTwo.getBullet().getBulletX() >= alienX-45 
+        && defenderTwo.getBullet().getBulletX() <= alienX+45 
+        && defenderTwo.getBullet().getBulletY() >= alienY+14 
+        && defenderTwo.getBullet().getBulletY() <= alienY+75 
         && !alienDeathState) {
         defenderThatHitTarget = defenderTwo;
         return true;
@@ -254,8 +254,8 @@ public class Alien {
   }
 
   private boolean didAlienPassDefender() {
-    if (alienY>=defender.defenderY-50 && !(alienX<=defender.defenderX+96 
-      && alienX >= defender.defenderX-96)) {
+    if (alienY>=defender.getDefenderY()-50 && !(alienX<=defender.getDefenderX()+96 
+      && alienX >= defender.getDefenderX()-96)) {
       return true;
     } else {
       return false;

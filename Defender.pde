@@ -3,15 +3,15 @@ public class Defender {
   private float defenderX, defenderY;
   private int hitCooldown, lives, maxLives;
   private boolean isVisible, targetHit, isPlayerTwo;
-  public Bullet bullet;
+  private Bullet bullet;
 
   public Defender() {
     bullet = new Bullet();
     this.isPlayerTwo = false;
-    if (isClient && multiplayer.connected) {
+    if (isClient && multiplayer.getConnected()) {
       defenderX = 3*(displayWidth/4);
     }
-    if (isHost && multiplayer.connected) {
+    if (isHost && multiplayer.getConnected()) {
       defenderX = displayWidth/4;
     } else {
       defenderX = displayWidth/2;
@@ -24,13 +24,13 @@ public class Defender {
     maxLives = 3;
   }
   
-  public Defender(boolean isPlayerTwo) {
+  public Defender(boolean isPlayerTwo) {//Fix this so server places in same position as client
     bullet = new Bullet();
     this.isPlayerTwo = isPlayerTwo;
-    if (isClient && multiplayer.connected) {
+    if (isClient && multiplayer.getConnected()) {
       defenderX = 3*(displayWidth/4);
     }
-    if (isHost && multiplayer.connected) {
+    if (isHost && multiplayer.getConnected()) {
       defenderX = displayWidth/4;
     } else {
       defenderX = displayWidth/2;
@@ -104,6 +104,9 @@ public class Defender {
   }
 
   //Getters
+  public Bullet getBullet(){
+    return bullet;
+  }
   public float getDefenderX() {
     return defenderX;
   }

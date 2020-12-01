@@ -21,7 +21,7 @@ import java.util.regex.*;
 
 Multiplayer multiplayer;
 int buyCounter, score, numberOfAliens, port;
-String serverIP, negotiate, externalIP;
+String serverIP, externalIP;
 boolean debug, isMultiplayer, menu, isHost, isClient;//some are used by both UI and Multiplayer classes, made them global
 Defender defender, defenderTwo;
 ArrayList<Alien> aliens;
@@ -35,7 +35,6 @@ float alienWidth, alienHeight;
 //Data is mostly initialised in setup to use it for resetting the sketch
 void setup() {
   parent = this; //used to reference the audio files correctly to the main tab
-  negotiate = "Not Ready";//initialised to some string that isn't the "magic" keyword, that accepts the connection
   images = new Images();
   serverIP = "127.0.0.1";
   externalIP = UPnP.getExternalIP();
@@ -64,12 +63,13 @@ void setup() {
     aliens.add(new Alien(i));
   }
   sounds = new Audio();
+  instance.gc(); //if the game is reloaded, removes old junk
 }
 
 void draw() {
   userInterface.singlePlayerUI();
   userInterface.multiplayerUI();
-  userInterface.freezeScreenUnfocused();
+  //userInterface.freezeScreenUnfocused();
 }
 
 void correctNumberOfAliens() {
@@ -129,8 +129,8 @@ boolean areAliensAllDead() { // Source: Michael Gerber - see readme)
 
 void mousePressed() {
   if (mouseButton == LEFT && focused && !menu) {
-    if (!defender.bullet.getFire()) {
-      defender.bullet.setFire(true);
+    if (!defender.getBullet().getFire()) {
+      defender.getBullet().setFire(true);
     }
   }
   if (focused) {
@@ -171,7 +171,7 @@ void keyPressed() {
   if (key == ESC && !menu) {
     userInterface.quitGame();
   }
-  if (key == ESC && menu && isMultiplayer && (isHost || isClient)) {
+  if (key == ESC && isMultiplayer && (isHost || isClient)) {
     userInterface.returnToMultiplayerMenu();
   }
   if (key == ESC && menu && isMultiplayer && !isHost && !isClient) {

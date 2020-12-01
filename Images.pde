@@ -1,27 +1,27 @@
 public class Images {
-  PImage defenderShipAsset;
-  PImage defenderShipAssetPlayerTwo;
-  PImage shieldAsset;
-  PImage backgroundAsset;
-  PImage playButtonAsset;
-  PImage playButtonAssetHighlighted;
-  PImage quitButtonAsset;
-  PImage quitButtonAssetHighlighted;
-  PImage hostButtonAsset;
-  PImage hostButtonAssetHighlighted;
-  PImage joinButtonAsset;
-  PImage joinButtonAssetHighlighted;
-  PImage backButtonAsset;
-  PImage backButtonAssetHighlighted;
-  PImage bannerAsset;
-  PImage multiplayerButtonAsset;
-  PImage multiplayerButtonAssetHighlighted;
-  PImage alienBulletAsset;
-  PImage explosionAsset;
-  PImage alienShipAsset;
-  PImage bulletAsset;
+  public PImage defenderShipAsset;
+  public PImage defenderShipAssetPlayerTwo;
+  public PImage shieldAsset;
+  public PImage backgroundAsset;
+  public PImage playButtonAsset;
+  public PImage playButtonAssetHighlighted;
+  public PImage quitButtonAsset;
+  public PImage quitButtonAssetHighlighted;
+  public PImage hostButtonAsset;
+  public PImage hostButtonAssetHighlighted;
+  public PImage joinButtonAsset;
+  public PImage joinButtonAssetHighlighted;
+  public PImage backButtonAsset;
+  public PImage backButtonAssetHighlighted;
+  public PImage bannerAsset;
+  public PImage multiplayerButtonAsset;
+  public PImage multiplayerButtonAssetHighlighted;
+  public PImage alienBulletAsset;
+  public PImage explosionAsset;
+  public PImage alienShipAsset;
+  public PImage bulletAsset;
 
-  Images() {
+  public Images() {
     defenderShipAsset = loadImage("assets/defenderShipAsset.png");
     defenderShipAssetPlayerTwo = loadImage("assets/defenderShipAssetPlayerTwo.png");
     shieldAsset = loadImage("assets/shieldAsset.png");
