@@ -2,7 +2,7 @@ public class Multiplayer {
 
   private Server gameServer;
   private Client gameClient;
-  private boolean connected;
+  private boolean connected, whosTurn, dataSent, dataParsed;//whosTurn prevents parsing and sending at the same time, improves performance, client and server take turns updating.
   private String[] dataReceived;
   private String clientIP, negotiate;
   private int openPortAttempts; 
@@ -18,9 +18,6 @@ public class Multiplayer {
   public void runMultiplayer() {//multiplayer menu screen behaviour.
     if (isHost) {
       if (connected) {
-        if (defenderTwo == null) {
-          defenderTwo = new Defender(true);//create player two (client is player two)
-        }
         sounds.multiplayerGameScreenSound();
         userInterface.gameScreen();
       } else {
@@ -31,9 +28,6 @@ public class Multiplayer {
     }
     if (isClient) {
       if (connected) {
-        if (defenderTwo == null) {
-          defenderTwo = new Defender(true);//create player one (server is player one)
-        }
         sounds.multiplayerGameScreenSound();
         userInterface.gameScreenClient();
       } else {
@@ -44,58 +38,71 @@ public class Multiplayer {
     }
   }
 
-  private void negotiateConnectionServerSide() {
-    negotiate = gameClient.readString();//save string
-    gameServer.
-      gameServer.write("SpaceInvaders");//tell the client servers string
-    if (negotiate == "IamAclient") {//test string
-      clientIP = gameClient.ip();
-      println("Connection accepted by Server! Client IP is: "+ clientIP);
-      connected = true;
-      //this method should not be called again if this code ran
-    } else if (negotiate != "IamAclient" && negotiate != null) {
-      println("Garbage received, resetting buffer. Received: "+ negotiate);
-      gameClient.clear();
-      clientIP = "127.0.0.1";
-      negotiate = null;
-    } else if (negotiate == null) {
-      println("Waiting for a client...");
-    }
-  }
+  //private void negotiateConnectionServerSide() {
+  //  negotiate = gameClient.readString();//save string
+  //    gameServer.write("SpaceInvaders");//tell the client servers string
+  //  if (negotiate.contains("IamAclient")) {//test string
+  //    clientIP = gameClient.ip();
+  //    println("Connection accepted by Server! Client IP is: "+ clientIP);
+  //    connected = true;
+  //    //this method should not be called again if this code ran
+  //  } else if (!negotiate.contains("IamAclient") && negotiate != null) {
+  //    println("Garbage received, resetting buffer. Received: "+ negotiate);
+  //    gameClient.clear();
+  //    clientIP = "127.0.0.1";
+  //    negotiate = null;
+  //  } else if (negotiate == null) {
+  //    println("Waiting for a client...");
+  //  }
+  //}
 
 
-  private void negotiateConnectionClientSide() {
-    if (gameClient.available()>0) {
-      negotiate = gameClient.readString();
-      gameClient.write("IamAclient");
-    }
-    if (negotiate == "SpaceInvaders") {
-      connected = true;
-      println("Connection accepted by Server!");
-    } else if (negotiate != "SpaceInvaders" && negotiate != null) {
-      println("Garbage received, resetting buffer. Received: "+ negotiate);
-      gameClient.clear();
-      connected = false;
-      negotiate = null;
-    } else if (negotiate == null) {
-      connected = false;
-    }
-  }
+  //private void negotiateConnectionClientSide() {
+  //  gameClient.write("IamAclient");
+  //  if (gameClient.available()>0) {
+  //    negotiate = gameClient.readString();
+  //  }
+  //  if (negotiate.contains("SpaceInvaders")) {
+  //    connected = true;
+  //    println("Connection accepted by Server!");
+  //  } else if (!negotiate.contains("SpaceInvaders") && negotiate != null) {
+  //    println("Garbage received, resetting buffer. Received: "+ negotiate);
+  //    gameClient.clear();
+  //    connected = false;
+  //    negotiate = null;
+  //  } else if (negotiate == null) {
+  //    connected = false;
+  //  }
+  //}
 
 
   private void client() {
     if (gameClient != null) {
-      if (!gameClient.active()) {
+      if (!gameClient.active()) {//should see the server if this gameClient.active() is true
         println("Don't mind the exception, processing net library won't let me catch it.");
         gameClient = null;
-      } else {
-        if (!connected) {//tell the server I am A client
-          negotiateConnectionClientSide();
-          println("negotiating");
-        } else {
-          println("writing data");
-          //parsReceivedServerData(gameClient.readString());
-          gameClient.write(generateClientData());
+      } else {//if this runs, the client sees a server, send data.
+        if (!connected && gameClient.active()) {
+          connected = true;
+          defenderTwo = new Defender(true);//create player one (server is player one)
+          whosTurn = true;
+          dataParsed = false;
+          dataSent = true;
+          println("Connected to: " + serverIP + ":" + port);
+        } else if (gameClient.available()>0) {
+          if (whosTurn && !dataParsed) {
+            println("reading data");
+            whosTurn = false;
+            dataParsed = true;
+            dataSent = false;
+            //parsReceivedServerData(gameClient.readString());//client side parsing of server's data
+          } else if (!whosTurn && !dataSent) {
+            println("writing data");
+            whosTurn = true;
+            dataSent = true;
+            dataParsed = false;
+            gameClient.write(generateClientData());
+          }
         }
       }
     } else if ( gameClient == null) {
@@ -115,17 +122,32 @@ public class Multiplayer {
       openPortAttempts++;
     }
     if (gameServer != null) {//needs to be nested in case game server is null, as the next if statement has reference to gameserver
-      if (gameServer.available() != null && gameClient != null) {
+      if (gameClient == null) {
         gameClient = gameServer.available();
-        println("A client has been spotted");
+        println("Attempting to capture client data");
       }
-      if (gameClient != null) {
-        if (connected && gameClient.available()>0) {//check there is a client connected and data is received
-          parseReceivedClientData(gameClient.readString());//server side parsing of client's data
-          gameServer.write(generateServerData());
-        } else if (!connected) { //is there no client yet?
-          negotiateConnectionServerSide();
-          println("negotiating");
+      if (gameClient != null) {//found a client!
+        if (!connected) {
+          connected = true;
+          defenderTwo = new Defender(true);//create player two (client is player two)
+          whosTurn = false;
+          dataSent = false;
+          dataParsed = true;
+        }
+        if (gameClient.available()>0) {//check there is a client connected and data is received
+          if (whosTurn && !dataParsed) {
+            println("reading data");
+            whosTurn = false;
+            dataParsed = true;
+            dataSent = false;
+            parseReceivedClientData(gameClient.readString());//server side parsing of client's data
+          } else if (!whosTurn && !dataSent) {
+            println("writing data");
+            whosTurn = true;
+            dataSent = true;
+            dataParsed = false;
+            gameServer.write(generateServerData());
+          }
         }
       }
     } else if (gameServer == null) {
@@ -237,7 +259,7 @@ public class Multiplayer {
     //int clientNumberOfAliens = numberOfAliens;
     //boolean clientDebug = debug;
     //int clientFrameCount = frameCount;
-    float clientDefenderX = defenderTwo.getDefenderX()+50;
+    float clientDefenderX = defenderTwo.getDefenderX();
     float clientDefenderY = defenderTwo.getDefenderY();
     int clientDefenderHitCooldown = defenderTwo.getHitCooldown();
     boolean clientDefenderIsVisible = defenderTwo.getIsVisible();
