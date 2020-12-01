@@ -46,7 +46,8 @@ public class Multiplayer {
 
   private void negotiateConnectionServerSide() {
     negotiate = gameClient.readString();//save string
-    gameServer.write("SpaceInvaders");//tell the client servers string
+    gameServer.
+      gameServer.write("SpaceInvaders");//tell the client servers string
     if (negotiate == "IamAclient") {//test string
       clientIP = gameClient.ip();
       println("Connection accepted by Server! Client IP is: "+ clientIP);
@@ -76,10 +77,8 @@ public class Multiplayer {
       gameClient.clear();
       connected = false;
       negotiate = null;
-      println("Waiting.");
     } else if (negotiate == null) {
       connected = false;
-      println("Waiting.");
     }
   }
 
@@ -92,6 +91,7 @@ public class Multiplayer {
       } else {
         if (!connected) {//tell the server I am A client
           negotiateConnectionClientSide();
+          println("negotiating");
         } else {
           println("writing data");
           //parsReceivedServerData(gameClient.readString());
@@ -114,9 +114,10 @@ public class Multiplayer {
       openAPort(port);
       openPortAttempts++;
     }
-    if (gameServer != null) {//needs to be nested in case game server is null, as second if has reference to gameserver
-      if (gameServer.available() != null) {
+    if (gameServer != null) {//needs to be nested in case game server is null, as the next if statement has reference to gameserver
+      if (gameServer.available() != null && gameClient != null) {
         gameClient = gameServer.available();
+        println("A client has been spotted");
       }
       if (gameClient != null) {
         if (connected && gameClient.available()>0) {//check there is a client connected and data is received
@@ -124,11 +125,14 @@ public class Multiplayer {
           gameServer.write(generateServerData());
         } else if (!connected) { //is there no client yet?
           negotiateConnectionServerSide();
+          println("negotiating");
         }
       }
     } else if (gameServer == null) {
       //set up the game as the server
+      println("setup server");
       gameServer = new Server(parent, port);//ready to send data to client
+      gameClient = null;
       openAPort(port);
     }
   }
