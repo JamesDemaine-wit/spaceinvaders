@@ -12,7 +12,7 @@ public class Alien {
     maxHits = 3;
     alienNumber = i;
     alienDeathState = false;
-    directionIsRight = boolean((int)Math.random());//random true or false.
+    directionIsRight = boolean(int(random(0,2)));//boolean((int)Math.random());//random true or false.
     alienX = (displayWidth/(numberOfAliens+1))*alienNumber;
     alienY = 40;
     alienBullet = new AlienBullet(alienNumber);
