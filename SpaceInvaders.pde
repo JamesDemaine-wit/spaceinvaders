@@ -22,7 +22,7 @@ import java.util.regex.*;
 Multiplayer multiplayer;
 int buyCounter, score, numberOfAliens, port;
 String serverIP, externalIP;
-boolean debug, isMultiplayer, menu, isHost, isClient;//some are used by both UI and Multiplayer classes, made them global
+boolean debug, isMultiplayer, menu, isHost, isClient, multiplayerEnabled;//some are used by both UI and Multiplayer classes, made them global
 Defender defender, defenderTwo;
 ArrayList<Alien> aliens;
 Runtime instance;
@@ -45,6 +45,7 @@ void setup() {
   background(0);
   noStroke();
   noCursor();
+  multiplayerEnabled = true;
   debug = false;
   menu = true;
   isHost = false;

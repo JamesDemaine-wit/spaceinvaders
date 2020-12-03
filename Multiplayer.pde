@@ -2,7 +2,7 @@ public class Multiplayer {
 
   private Server gameServer;
   private Client gameClient;
-  private boolean connected, whosTurn, dataSent, dataParsed;//whosTurn prevents parsing and sending at the same time, improves performance, client and server take turns updating.
+  private boolean connected;//whosTurn prevents parsing and sending at the same time, improves performance, client and server take turns updating.
   private String[] dataReceived;
   private String clientIP, negotiate;
   private int openPortAttempts; 
@@ -85,24 +85,11 @@ public class Multiplayer {
         if (!connected && gameClient.active()) {
           connected = true;
           defenderTwo = new Defender(true);//create player one (server is player one)
-          whosTurn = true;
-          dataParsed = false;
-          dataSent = true;
           println("Connected to: " + serverIP + ":" + port);
         } else if (gameClient.available()>0) {
-          if (whosTurn && !dataParsed) {
-            println("reading data");
-            whosTurn = false;
-            dataParsed = true;
-            dataSent = false;
-            //parsReceivedServerData(gameClient.readString());//client side parsing of server's data
-          } else if (!whosTurn && !dataSent) {
-            println("writing data");
-            whosTurn = true;
-            dataSent = true;
-            dataParsed = false;
-            gameClient.write(generateClientData());
-          }
+          println("reading data");
+          //parsReceivedServerData(gameClient.readString());//client side parsing of server's data
+          gameClient.write(generateClientData());
         }
       }
     } else if ( gameClient == null) {
@@ -130,24 +117,10 @@ public class Multiplayer {
         if (!connected) {
           connected = true;
           defenderTwo = new Defender(true);//create player two (client is player two)
-          whosTurn = false;
-          dataSent = false;
-          dataParsed = true;
         }
         if (gameClient.available()>0) {//check there is a client connected and data is received
-          if (whosTurn && !dataParsed) {
-            println("reading data");
-            whosTurn = false;
-            dataParsed = true;
-            dataSent = false;
-            parseReceivedClientData(gameClient.readString());//server side parsing of client's data
-          } else if (!whosTurn && !dataSent) {
-            println("writing data");
-            whosTurn = true;
-            dataSent = true;
-            dataParsed = false;
-            gameServer.write(generateServerData());
-          }
+          thread("parseReceivedClientData"); //server side parsing of client's data
+          gameServer.write(generateServerData());
         }
       }
     } else if (gameServer == null) {
@@ -178,7 +151,7 @@ public class Multiplayer {
     }
   }
 
-  private String generateClientData() {
+  public String generateClientData() {
     String dataToSend;
     //all positional floats have been converted to be proportianal to the display. ie, pos x at 800 of a 1000 wide display, is 0.8
     dataToSend = "begin.main ";//index 0
@@ -205,7 +178,7 @@ public class Multiplayer {
     return dataToSend;
   }
 
-  private String generateServerData() {
+  public String generateServerData() {
     String dataToSend;
     //all positional floats have been converted to be proportianal to the display. ie, pos x at 800 of a 1000 wide display, is 0.8
     dataToSend = "begin.main ";//index 0
@@ -247,8 +220,13 @@ public class Multiplayer {
   }
 
 
-  private void parseReceivedClientData(String rawDataReceived) {
-    boolean dataIntegrity = false;//to prevent nullpointer if the client sent nothing/garbage
+  public void parseReceivedClientData() {
+    String rawDataReceived = gameClient.readString();
+    if (rawDataReceived == null) { 
+      println("nothing received");
+      return;
+    }
+    boolean dataIntegrity = false;//to prevent nullpointer if the client sent garbage
 
     //create local variables for the client data, use local values to initialise,
     //prevents nullpointer in case of data integrity failure

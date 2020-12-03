@@ -244,18 +244,17 @@ public class UserInterface {
 
   private void drawJoinButton() {
     if (drawButton(images.joinButtonAsset, images.joinButtonAssetHighlighted, displayWidth/2, displayHeight/2, 300, 100)) {
-      //if (!sounds.errorSound.isPlaying()) {
-      //  sounds.errorSound.play();
-      //}
-      sounds.menuMusic.stop();
-      askForAddress();
-      score = 0;
-      isClient = true;
-      //askForPort();//Not going to ask for port, use 25565 always.
-      //textAlign(LEFT);
-      //textSize(24);
-      //fill(255, 0, 0);
-      //text("Almost ready!", displayWidth/2+155, displayHeight/2);
+      if (multiplayerEnabled) {
+        askForAddress();
+      } else {
+        if (!sounds.errorSound.isPlaying()) {
+          sounds.errorSound.play();
+        }
+        textAlign(LEFT);
+        textSize(24);
+        fill(255, 0, 0);
+        text("Almost ready!", displayWidth/2+155, displayHeight/2);
+      }
     }
   }
 
@@ -265,19 +264,18 @@ public class UserInterface {
 
   private void askForAddress() {
     //Using: https://stackoverflow.com/questions/39107750/java-and-processing-3-0-frame-class-deprecated-is-there-an-alternative
-    //casting PSurface window to OpenGL window and saving to GLWindow object type, to call its methods.
+    //casting PSurface window to OpenGL window and saving to GLWindow, to call its methods.
     //the frame object did not have the method needed.
+
     com.jogamp.newt.opengl.GLWindow window = (com.jogamp.newt.opengl.GLWindow)(((PSurfaceJOGL)surface).getNative());
-    noLoop();//prevents trying to draw while the window is not being displayed
+    noLoop();//prevents trying to draw while the window is not being displayed - will be resumed when sketch comes back into focus.
     window.setVisible(false);//hide the window
     String userInput = JOptionPane.showInputDialog(null, "Enter Server IP:", "127.0.0.1");//request the IP
-    window.setVisible(true);//display the window
-    window.requestFocus();
-    //window.requestFocus();
-    //parent.getSurface().setVisible(true);
-    //parent.start();
-    if (userInput == null) {
+    if (userInput == null || userInput == "127.0.0.1") {
       inputErrorMessage("You need to enter an IP address to play online.");
+      window.setVisible(true);//display the window
+      window.requestFocus();
+      loop();//resumes drawing
       returnToMultiplayerMenu();
     } else if (userInput.length()>15) {
       inputErrorMessage("Input too long!");
@@ -298,7 +296,12 @@ public class UserInterface {
       }
       serverIP = userInput;
       println("User connecting to IP: "+userInput);
+      window.setVisible(true);//display the window
+      window.requestFocus();
       loop();//resumes drawing
+      score = 0;
+      isClient = true;
+      sounds.menuMusic.stop();
     } else {
       inputErrorMessage("That was not an IP address.");
       println(userInput);
