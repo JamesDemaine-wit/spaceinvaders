@@ -106,10 +106,10 @@ public class UserInterface {
     }
     background(0);
     drawBackground();
+    stats();
     defender.beADefender();
     drawAliens();
     debug();
-    stats();
     sounds.music();
   }
 
@@ -119,10 +119,10 @@ public class UserInterface {
     }
     background(0);
     drawBackground();
+    stats();
     defender.beADefender();
     debug();
     drawClientAliens(); //FIX THIS for aliens that only move based on server
-    stats();
     sounds.music();
   }
 
@@ -161,20 +161,23 @@ public class UserInterface {
   }
 
   private void stats() {
+    imageMode(CORNER);
+    image(images.statsBoard, 0, 0, 480, 240);
     textAlign(LEFT);
-    textSize(24);
-    fill(255, 0, 0);
-    text("SCORE: "+ score, 10, 24);
-    text("LIVES: "+ defender.getLives(), 10, 48);
+    textSize(36);
+    fill(0);
+    text("SCORE: "+ score, 24, 48);
+    text("LIVES: "+ defender.getLives(), 24, 88);
     if (sounds.getMusicMuted()) {
-      text("MUSIC: OFF - Press M to turn on.", 10, 72);
+      text("MUSIC: Muted\nPress M to unmute.", 24, 160);
     }
     if (!sounds.getMusicMuted()) {
-      text("MUSIC: ON - Press M to turn off.", 10, 72);
+      text("MUSIC: ON\nPress M to mute.", 24, 160);
     }
     if (score>=500*buyCounter && defender.getLives()<defender.getMaxLives()) {
       textAlign(CENTER);
-      text("Right click to buy more lives using "+ 500*buyCounter + " of your score.", displayWidth/2, displayHeight/3);
+      fill(255,0,0);
+      text("Right click to buy more lives using "+ 500*buyCounter + " of your score.", displayWidth/2, displayHeight-50);
     }
   }
 
@@ -242,70 +245,6 @@ public class UserInterface {
     }
   }
 
-  public void errorMessage(String message, boolean externalCall) {
-    if (externalCall) {
-      com.jogamp.newt.opengl.GLWindow window = (com.jogamp.newt.opengl.GLWindow)(((PSurfaceJOGL)surface).getNative());
-      noLoop();//prevents trying to draw while the window is not being displayed - will be resumed when sketch comes back into focus.
-      window.setVisible(false);//hide the window
-      JOptionPane.showMessageDialog(null, message);
-      window.setVisible(true);//display the window
-      window.requestFocus();
-      loop();//resumes drawing
-    } else {
-      JOptionPane.showMessageDialog(null, message);
-    }
-  }
-
-  private void askForAddress() {
-    //Using: https://stackoverflow.com/questions/39107750/java-and-processing-3-0-frame-class-deprecated-is-there-an-alternative
-    //casting PSurface window to OpenGL window and saving to GLWindow, to call its methods.
-    //the frame object did not have the method needed.
-
-    com.jogamp.newt.opengl.GLWindow window = (com.jogamp.newt.opengl.GLWindow)(((PSurfaceJOGL)surface).getNative());
-    noLoop();//prevents trying to draw while the window is not being displayed - will be resumed when sketch comes back into focus.
-    window.setVisible(false);//hide the window
-
-    //now that the window is hidden, ask for input: 
-    String userInput = JOptionPane.showInputDialog(null, "Enter Server IP:", "127.0.0.1");//request the IP
-    if (userInput == null || userInput == "127.0.0.1") {
-      errorMessage("You need to enter an IP address to play online.", false);
-      window.setVisible(true);//display the window
-      window.requestFocus();
-      loop();//resumes drawing
-      returnToMultiplayerMenu();
-    } else if (userInput.length()>15) {
-      errorMessage("Input too long!", false);
-      askForAddress();
-      return;//return is to prevent the rest of the first instance of the method from continuing if it is called again
-    } else if (userInput.contains(".")) {//looks similar to an IP?
-      String[] sections = userInput.split("\\D", 4);//only checks non-digits, assuming '.' as the non digits
-      for (String s : sections) {
-        //regex support for hostnames in future?
-        boolean match3 = Pattern.matches("\\d{3}", s);//any digit 0-9, length of 3
-        boolean match2 = Pattern.matches("\\d{2}", s);//    ""       , length of 2
-        boolean match1 = Pattern.matches("\\d{1}", s);//    ""        , length of 1
-        if (!match3 && !match2 && !match1) {
-          errorMessage("That was not a valid IP address.", false);
-          askForAddress();
-          return;
-        }
-      }
-      serverIP = userInput;
-      println("User connecting to IP: "+userInput);
-      window.setVisible(true);//display the window
-      window.requestFocus();
-      loop();//resumes drawing
-      score = 0;
-      isClient = true;
-      sounds.menuMusic.stop();
-    } else {
-      errorMessage("That was not an IP address.", false);
-      println(userInput);
-      askForAddress();
-      return;
-    }
-  }
-
   private void drawBackButton() {
     if (drawButton(images.backButtonAsset, images.backButtonAssetHighlighted, displayWidth/2, displayHeight/2+125, 300, 100)) {
       isMultiplayer = false;
@@ -369,6 +308,70 @@ public class UserInterface {
       return true;
     } else {
       return false;
+    }
+  }
+
+  public void errorMessage(String message, boolean externalCall) {
+    if (externalCall) {
+      com.jogamp.newt.opengl.GLWindow window = (com.jogamp.newt.opengl.GLWindow)(((PSurfaceJOGL)surface).getNative());
+      noLoop();//prevents trying to draw while the window is not being displayed - will be resumed when sketch comes back into focus.
+      window.setVisible(false);//hide the window
+      JOptionPane.showMessageDialog(null, message);
+      window.setVisible(true);//display the window
+      window.requestFocus();
+      loop();//resumes drawing
+    } else {
+      JOptionPane.showMessageDialog(null, message);
+    }
+  }
+
+  private void askForAddress() {
+    //Using: https://stackoverflow.com/questions/39107750/java-and-processing-3-0-frame-class-deprecated-is-there-an-alternative
+    //casting PSurface window to OpenGL window and saving to GLWindow, to call its methods.
+    //the frame object did not have the method needed.
+
+    com.jogamp.newt.opengl.GLWindow window = (com.jogamp.newt.opengl.GLWindow)(((PSurfaceJOGL)surface).getNative());
+    noLoop();//prevents trying to draw while the window is not being displayed - will be resumed when sketch comes back into focus.
+    window.setVisible(false);//hide the window
+
+    //now that the window is hidden, ask for input: 
+    String userInput = JOptionPane.showInputDialog(null, "Enter Server IP:", "127.0.0.1");//request the IP
+    if (userInput == null || userInput == "127.0.0.1") {
+      errorMessage("You need to enter an IP address to play online.", false);
+      window.setVisible(true);//display the window
+      window.requestFocus();
+      loop();//resumes drawing
+      returnToMultiplayerMenu();
+    } else if (userInput.length()>15) {
+      errorMessage("Input too long!", false);
+      askForAddress();
+      return;//return is to prevent the rest of the first instance of the method from continuing if it is called again
+    } else if (userInput.contains(".")) {//looks similar to an IP?
+      String[] sections = userInput.split("\\D", 4);//only checks non-digits, assuming '.' as the non digits
+      for (String s : sections) {
+        //regex support for hostnames in future?
+        boolean match3 = Pattern.matches("\\d{3}", s);//any digit 0-9, length of 3
+        boolean match2 = Pattern.matches("\\d{2}", s);//    ""       , length of 2
+        boolean match1 = Pattern.matches("\\d{1}", s);//    ""        , length of 1
+        if (!match3 && !match2 && !match1) {
+          errorMessage("That was not a valid IP address.", false);
+          askForAddress();
+          return;
+        }
+      }
+      serverIP = userInput;
+      println("User connecting to IP: "+userInput);
+      window.setVisible(true);//display the window
+      window.requestFocus();
+      loop();//resumes drawing
+      score = 0;
+      isClient = true;
+      sounds.menuMusic.stop();
+    } else {
+      errorMessage("That was not an IP address.", false);
+      println(userInput);
+      askForAddress();
+      return;
     }
   }
 

@@ -20,6 +20,7 @@ public class Images {
   public PImage explosionAsset;
   public PImage alienShipAsset;
   public PImage bulletAsset;
+  public PImage statsBoard;
 
   public Images() {
     defenderShipAsset = loadImage("assets/defenderShipAsset.png");
@@ -43,5 +44,6 @@ public class Images {
     alienShipAsset = loadImage("assets/alienShip.png");
     bulletAsset = loadImage("assets/bulletAsset.png");
     explosionAsset = loadImage("assets/explosion.png");
+    statsBoard = loadImage("assets/statsBoard.png");
   }
 }
