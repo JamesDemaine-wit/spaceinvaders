@@ -67,6 +67,7 @@ public class Multiplayer {
         sounds.waitingSound();
       }
       if (!serverThreadRunning) {
+        serverThreadRunning = true;
         thread("server");
         serverThreadRunning = false;//server();
       }
@@ -79,7 +80,11 @@ public class Multiplayer {
         userInterface.waitingForServer();
         sounds.waitingSound();
       }
-      client();
+      if (!clientThreadRunning) {
+        clientThreadRunning = true;
+        thread("client");
+        clientThreadRunning = false;//server();
+      }
     }
   }
 
@@ -253,31 +258,6 @@ public class Multiplayer {
     } else {
       println("Received garbage when parsing client data.");
       multiplayer.gameClient.clear();
-    }
-  }
-
-  private void client() {
-    if (gameClient != null) {
-      if (!gameClient.active()) {//should see the server if this gameClient.active() is true
-        println("Don't mind the exception, processing net library won't let me catch it.");
-        gameClient = null;
-      } else {//if this runs, the client sees a server, send data.
-        if (!connected && gameClient.active()) {
-          connected = true;
-          defenderTwo = new Defender(true);//create player one (server is player one)
-          thread("clientSender");//send the first piece of the pie! (send the first data, so the server see's a client is connected and active etc.)
-          println("Connected to: " + serverIP + ":" + port);
-        } else if (gameClient.available()>0) {//should only run when the client receives data.
-          //parsReceivedServerData(gameClient.readString());//client side parsing of server's data
-          thread("clientSender");
-        }
-      }
-    } else if ( gameClient == null) {
-      println("setup client");
-      gameClient = new Client(parent, serverIP, port);
-      //Should throw an exception if the server refuses connection,
-      //library catches exception instead of throwing it. 
-      //rather annoying, so I have to check for the connection in the next loop cycle
     }
   }
 }

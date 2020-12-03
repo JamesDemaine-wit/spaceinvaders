@@ -81,18 +81,12 @@ public class UserInterface {
   }
 
   public void returnToMultiplayerMenu() {
-    if (isHost) {
-      if (multiplayer.gameServer != null) {
-        multiplayer.gameServer.stop();
-      }
-      if (multiplayer.gameClient != null) {
-        multiplayer.gameClient.stop();
-      }
+    if (multiplayer.gameServer != null) {
+      multiplayer.gameServer.stop();
+      UPnP.closePortTCP(port);//close the port for good measure.
     }
-    if (isClient) {
-      if (multiplayer.gameClient != null) {
-        multiplayer.gameClient.stop();
-      }
+    if (multiplayer.gameClient != null) {
+      multiplayer.gameClient.stop();
     }
     if (sounds.dialupSound.isPlaying()) {
       sounds.dialupSound.stop();
@@ -244,22 +238,22 @@ public class UserInterface {
 
   private void drawJoinButton() {
     if (drawButton(images.joinButtonAsset, images.joinButtonAssetHighlighted, displayWidth/2, displayHeight/2, 300, 100)) {
-      if (multiplayerEnabled) {
-        askForAddress();
-      } else {
-        if (!sounds.errorSound.isPlaying()) {
-          sounds.errorSound.play();
-        }
-        textAlign(LEFT);
-        textSize(24);
-        fill(255, 0, 0);
-        text("Almost ready!", displayWidth/2+155, displayHeight/2);
-      }
+      askForAddress();
     }
   }
 
-  private void inputErrorMessage(String message) {
-    JOptionPane.showMessageDialog(null, message);
+  public void errorMessage(String message, boolean externalCall) {
+    if (externalCall) {
+      com.jogamp.newt.opengl.GLWindow window = (com.jogamp.newt.opengl.GLWindow)(((PSurfaceJOGL)surface).getNative());
+      noLoop();//prevents trying to draw while the window is not being displayed - will be resumed when sketch comes back into focus.
+      window.setVisible(false);//hide the window
+      JOptionPane.showMessageDialog(null, message);
+      window.setVisible(true);//display the window
+      window.requestFocus();
+      loop();//resumes drawing
+    } else {
+      JOptionPane.showMessageDialog(null, message);
+    }
   }
 
   private void askForAddress() {
@@ -270,15 +264,17 @@ public class UserInterface {
     com.jogamp.newt.opengl.GLWindow window = (com.jogamp.newt.opengl.GLWindow)(((PSurfaceJOGL)surface).getNative());
     noLoop();//prevents trying to draw while the window is not being displayed - will be resumed when sketch comes back into focus.
     window.setVisible(false);//hide the window
+
+    //now that the window is hidden, ask for input: 
     String userInput = JOptionPane.showInputDialog(null, "Enter Server IP:", "127.0.0.1");//request the IP
     if (userInput == null || userInput == "127.0.0.1") {
-      inputErrorMessage("You need to enter an IP address to play online.");
+      errorMessage("You need to enter an IP address to play online.", false);
       window.setVisible(true);//display the window
       window.requestFocus();
       loop();//resumes drawing
       returnToMultiplayerMenu();
     } else if (userInput.length()>15) {
-      inputErrorMessage("Input too long!");
+      errorMessage("Input too long!", false);
       askForAddress();
       return;//return is to prevent the rest of the first instance of the method from continuing if it is called again
     } else if (userInput.contains(".")) {//looks similar to an IP?
@@ -289,7 +285,7 @@ public class UserInterface {
         boolean match2 = Pattern.matches("\\d{2}", s);//    ""       , length of 2
         boolean match1 = Pattern.matches("\\d{1}", s);//    ""        , length of 1
         if (!match3 && !match2 && !match1) {
-          inputErrorMessage("That was not a valid IP address.");
+          errorMessage("That was not a valid IP address.", false);
           askForAddress();
           return;
         }
@@ -303,7 +299,7 @@ public class UserInterface {
       isClient = true;
       sounds.menuMusic.stop();
     } else {
-      inputErrorMessage("That was not an IP address.");
+      errorMessage("That was not an IP address.", false);
       println(userInput);
       askForAddress();
       return;
@@ -319,10 +315,17 @@ public class UserInterface {
 
   private void drawMultiplayerButton() {
     if (drawButton(images.multiplayerButtonAsset, images.multiplayerButtonAssetHighlighted, displayWidth/2 +250, displayHeight/2 - 125, 64, 64)) {
-      isMultiplayer = true;
-      //if (!sound.deathSound.isPlaying()) {
-      //  sound.deathSound.play();
-      //}
+      if (multiplayerEnabled) {
+        isMultiplayer = true;
+      } else {
+        if (!sounds.errorSound.isPlaying()) {
+          sounds.errorSound.play();
+        }
+        textAlign(CENTER);
+        textSize(24);
+        fill(255, 0, 0);
+        text("Coming in V1.0!", displayWidth/2 +250, displayHeight/2 - 175);
+      }
     }
   }
 

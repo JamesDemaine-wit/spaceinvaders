@@ -45,7 +45,7 @@ void setup() {
   background(0);
   noStroke();
   noCursor();
-  multiplayerEnabled = true;
+  multiplayerEnabled = false;
   debug = false;
   menu = true;
   isHost = false;
@@ -195,10 +195,7 @@ void keyPressed() {
   }
 }
 
-//Moved the following methods out of the multiplayer class to give their own threads
-public void serverParser() {
-  multiplayer.parseReceivedClientData();
-}
+//Moved client and server to their own threads, drastically improves framerate.
 
 public void server() {
   if (!UPnP.isMappedTCP(port) && multiplayer.getOpenPortAttempts()<3) {
@@ -218,8 +215,7 @@ public void server() {
         multiplayer.setConnected(true);
         defenderTwo = new Defender(true);//create player two (client is player two)
       } else if (multiplayer.gameClient.available()>0) {//check there is a client connected and data is received
-        thread("serverParser"); //server side parsing of client's data, gave it its own thread.
-        //parseReceivedClientData();
+        multiplayer.parseReceivedClientData(); //server side parsing of client's data.
         //gameServer.write(generateServerData());
       } else {
         println("received nothing");
@@ -239,6 +235,29 @@ public void server() {
   }
 }
 
-public void clientSender() {
-  multiplayer.gameClient.write(multiplayer.generateClientData());
+public void client() {
+  if (multiplayer.gameClient != null) {
+    if (!multiplayer.gameClient.active()) {//should see the server if this gameClient.active() is true
+      println("Connection refused!");
+      multiplayer.gameClient = null;
+      userInterface.returnToMultiplayerMenu();
+      userInterface.errorMessage("Connection Refused\nAsk your friend to Host a game!", true);
+    } else {//if this runs, the client sees a server, send data.
+      if (!multiplayer.getConnected() && multiplayer.gameClient.active()) {
+        multiplayer.setConnected(true);
+        defenderTwo = new Defender(true);//create player one (server is player one)
+        thread("clientSender");//send the first piece of the pie! (send the first data, so the server see's a client is connected and active etc.)
+        println("Connected to: " + serverIP + ":" + port);
+      } else if (multiplayer.gameClient.available()>0) {//should only run when the client receives data.
+        //parsReceivedServerData(gameClient.readString());//client side parsing of server's data
+        multiplayer.gameClient.write(multiplayer.generateClientData());
+      }
+    }
+  } else if ( multiplayer.gameClient == null) {
+    println("setup client");
+    multiplayer.gameClient = new Client(parent, serverIP, port);
+    //Should throw an exception if the server refuses connection,
+    //library catches exception instead of throwing it. 
+    //rather annoying, so I have to check for the connection in the next loop cycle
+  }
 }
