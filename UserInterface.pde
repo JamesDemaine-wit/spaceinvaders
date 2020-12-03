@@ -82,23 +82,23 @@ public class UserInterface {
 
   public void returnToMultiplayerMenu() {
     if (isHost) {
-      if (multiplayer.getGameServer() != null) {
-        multiplayer.getGameServer().stop();
+      if (multiplayer.gameServer != null) {
+        multiplayer.gameServer.stop();
       }
-      if (multiplayer.getGameClient() != null) {
-        multiplayer.getGameClient().stop();
+      if (multiplayer.gameClient != null) {
+        multiplayer.gameClient.stop();
       }
     }
     if (isClient) {
-      if (multiplayer.getGameClient() != null) {
-        multiplayer.getGameClient().stop();
+      if (multiplayer.gameClient != null) {
+        multiplayer.gameClient.stop();
       }
     }
     if (sounds.dialupSound.isPlaying()) {
       sounds.dialupSound.stop();
     }
-    multiplayer.setGameServer(null);
-    multiplayer.setGameClient(null);
+    multiplayer.gameServer = null;
+    multiplayer.gameClient = null;
     multiplayer.setNegotiate(null);
     defenderTwo = null;
     isHost = false;
@@ -313,7 +313,7 @@ public class UserInterface {
   private void drawBackButton() {
     if (drawButton(images.backButtonAsset, images.backButtonAssetHighlighted, displayWidth/2, displayHeight/2+125, 300, 100)) {
       isMultiplayer = false;
-      multiplayer.setGameServer(null);
+      multiplayer.gameServer = null;
     }
   }
 
@@ -370,6 +370,9 @@ public class UserInterface {
   }
 
   private void debug() {
+    int mb = 1024 * 1024;
+    int used = int(((instance.totalMemory()/mb)-(instance.freeMemory()/mb)));
+    int total = int((instance.totalMemory()/mb));
     if (!debug) {
       fill(0, 255, 0);
       textAlign(RIGHT);
@@ -377,9 +380,6 @@ public class UserInterface {
       text("Press F1 for Debug", displayWidth, 20);
     }
     if (debug && !menu) {
-      int mb = 1024 * 1024; //https://crunchify.com/java-runtime-get-free-used-and-total-memory-in-java/
-      int used = int(((instance.totalMemory()/mb)-(instance.freeMemory()/mb)));
-      int total = int((instance.totalMemory()/mb)); 
       //I added in memory usage as I ran into an issue when loading large image and audio files
       fill(0, 255, 0);
       textAlign(RIGHT);
@@ -393,9 +393,6 @@ public class UserInterface {
       text("Memory: "+ used + "MB / "+ total + "MB", displayWidth, 140);
     }
     if (debug && menu && !(isHost || isClient)) {
-      int mb = 1024 * 1024;
-      int used = int(((instance.totalMemory()/mb)-(instance.freeMemory()/mb)));
-      int total = int((instance.totalMemory()/mb));
       textAlign(RIGHT);
       fill(0, 255, 0);
       textSize(16);
@@ -410,13 +407,21 @@ public class UserInterface {
       text("Available at: "+ externalIP + ":"+ port, displayWidth, 20);
       text("UPnP Avail: "+ UPnP.isUPnPAvailable(), displayWidth, 40);
       text("UPnP: "+ UPnP.isMappedTCP(port), displayWidth, 60);
-      if (isHost && multiplayer.getGameServer() !=null) {
+      if (isHost && multiplayer.gameServer !=null) {
         text("Game Server:", displayWidth, 80);
-        text("Active: "+ multiplayer.getGameServer().active(), displayWidth, 100);
-        text("Number of Clients: "+ multiplayer.getGameServer().clientCount, displayWidth, 120);
-      } else if (isClient && multiplayer.getGameClient() != null) {
+        text("Active: "+ multiplayer.gameServer.active(), displayWidth, 100);
+        text("Number of Clients: "+ multiplayer.gameServer.clientCount, displayWidth, 120);
+        text("Connected: "+multiplayer.getConnected(), displayWidth, 140);
+        text("Display Dimensions: "+ displayWidth + " x " + displayHeight, displayWidth, 160);
+        text("Framerate: "+ int(frameRate), displayWidth, 180);
+        text("Memory: "+ used + "MB / "+ total + "MB", displayWidth, 200);
+      } else if (isClient && multiplayer.gameClient != null) {
         text("Game Client:", displayWidth, 80);
-        text("Active: "+ multiplayer.getGameClient().active(), displayWidth, 100);
+        text("Active: "+ multiplayer.gameClient.active(), displayWidth, 100);
+        text("Connected: "+multiplayer.getConnected(), displayWidth, 120);
+        text("Display Dimensions: "+ displayWidth + " x " + displayHeight, displayWidth, 140);
+        text("Framerate: "+ int(frameRate), displayWidth, 160);
+        text("Memory: "+ used + "MB / "+ total + "MB", displayWidth, 180);
       }
     }
   }

@@ -83,6 +83,7 @@ void correctNumberOfAliens() {
     for (int i = aliens.size(); i > numberOfAliens; i--) {//when there are more aliens than there should be
       aliens.remove(i-1);//removes last alien from the list
     }
+    instance.gc();
   }
 }
 
@@ -113,7 +114,6 @@ void resetToMenu() {
     sounds.deathSound.play();
   }
   setup();
-  instance.gc();
   delay(500);
 }
 
@@ -129,9 +129,19 @@ boolean areAliensAllDead() { // Source: Michael Gerber - see readme)
 }
 
 void mousePressed() {
-  if (mouseButton == LEFT && focused && !menu) {
+  if (mouseButton == LEFT && focused && !menu && !(isHost || isClient)) {
     if (!defender.getBullet().getFire()) {
       defender.getBullet().setFire(true);
+    }
+  } else if (mouseButton == LEFT && focused && multiplayer.getConnected()) {
+    if (isHost) {
+      if (!defender.getBullet().getFire()) {
+        defender.getBullet().setFire(true);
+      }
+    } else if (isClient) {
+      if (!defenderTwo.getBullet().getFire()) {
+        defenderTwo.getBullet().setFire(true);
+      }
     }
   }
   if (focused) {
@@ -183,4 +193,52 @@ void keyPressed() {
     //exitPrompt();      reserved to keep the game open in the main menu, make an exit prompt?
     key = 0;
   }
+}
+
+//Moved the following methods out of the multiplayer class to give their own threads
+public void serverParser() {
+  multiplayer.parseReceivedClientData();
+}
+
+public void server() {
+  if (!UPnP.isMappedTCP(port) && multiplayer.getOpenPortAttempts()<3) {
+    println("The port is closed, attempting to open again!");
+    multiplayer.openAPort(port);
+    multiplayer.setOpenPortAttempts(multiplayer.getOpenPortAttempts()+1);
+  } else if (multiplayer.gameServer != null) {//needs to be nested in case game server is null, as the next if statement has reference to gameserver
+    if (multiplayer.gameClient == null && multiplayer.getConnected()) {
+      println("was the connection lost?");
+      userInterface.returnToMultiplayerMenu();
+      return;
+    } else if (multiplayer.gameClient == null && !multiplayer.getConnected()) {//Nothing was sent
+      multiplayer.gameClient = multiplayer.gameServer.available();
+      println("Waiting for client");
+    } else if (multiplayer.gameClient != null) {//found a client!
+      if (!multiplayer.getConnected()) {
+        multiplayer.setConnected(true);
+        defenderTwo = new Defender(true);//create player two (client is player two)
+      } else if (multiplayer.gameClient.available()>0) {//check there is a client connected and data is received
+        thread("serverParser"); //server side parsing of client's data, gave it its own thread.
+        //parseReceivedClientData();
+        //gameServer.write(generateServerData());
+      } else {
+        println("received nothing");
+      }
+    }
+  } else if (multiplayer.gameServer == null) {
+    if (multiplayer.getConnected()) {
+      println("did the server crash?");
+      userInterface.returnToMultiplayerMenu();
+      return;
+    }
+    //set up the game as the server
+    println("setup server");
+    multiplayer.gameServer = new Server(parent, port);//ready to send data to client
+    multiplayer.gameClient = null;
+    multiplayer.openAPort(port);
+  }
+}
+
+public void clientSender() {
+  multiplayer.gameClient.write(multiplayer.generateClientData());
 }
