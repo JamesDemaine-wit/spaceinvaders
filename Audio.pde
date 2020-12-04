@@ -67,7 +67,7 @@ public class Audio {
 
   public void menuSoundBehaviour() {
     if (menu) {
-      if (userInterface.shouldMenuSoundPlay() && !userInterface.soundPlayed) {
+      if (userInterface.shouldMenuSoundPlay() && !userInterface.getSoundPlayed()) {
         menuButtonSound.play();
         userInterface.setSoundPlayed(true);
       } else if (!userInterface.shouldMenuSoundPlay()) {

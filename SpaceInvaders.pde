@@ -19,21 +19,21 @@ import java.util.regex.*;
 // Learnt this the hard way when testing for open ports using and app on my cellphone.
 //I used the minecraft port, since it is well known by ISP's and won't be likely to get blocked.
 
-Multiplayer multiplayer;
-int buyCounter, score, numberOfAliens, port;
-String serverIP, externalIP;
-boolean debug, isMultiplayer, menu, isHost, isClient, multiplayerEnabled;//some are used by both UI and Multiplayer classes, made them global
-Defender defender, defenderTwo;
-ArrayList<Alien> aliens;
-Runtime instance;
-UserInterface userInterface;
-Audio sounds;
-PApplet parent;
-Images images;
-float alienWidth, alienHeight;
+public Multiplayer multiplayer;
+public int buyCounter, score, numberOfAliens, port;
+public String serverIP, externalIP;
+public boolean debug, isMultiplayer, menu, isHost, isClient, multiplayerEnabled;//some are used by both UI and Multiplayer classes, made them global
+public Defender defender, defenderTwo;
+public ArrayList<Alien> aliens;
+public Runtime instance;
+public UserInterface userInterface;
+public Audio sounds;
+public PApplet parent;
+public Images images;
+public float alienWidth, alienHeight;
 
 //Data is mostly initialised in setup to use it for resetting the sketch
-void setup() {
+public void setup() {
   parent = this; //used to reference the audio files correctly to the main tab
   images = new Images();
   serverIP = "127.0.0.1";
@@ -67,7 +67,7 @@ void setup() {
   instance.gc(); //if the game is reloaded, removes old junk
 }
 
-void draw() {
+public void draw() {
   userInterface.singlePlayerUI();
   userInterface.multiplayerUI();
   //userInterface.freezeScreenUnfocused();
@@ -87,7 +87,7 @@ void correctNumberOfAliens() {
   }
 }
 
-void buyLivesWithScore() {
+public void buyLivesWithScore() {
   if (score>=500*buyCounter && defender.getLives()<defender.getMaxLives()) {
     score-=500*buyCounter;
     defender.setLives(defender.getLives()+1);
@@ -95,7 +95,7 @@ void buyLivesWithScore() {
   }
 }
 
-void bonusScore() {
+public void bonusScore() {
   if (areAliensAllDead()) {
     if (200-(5*buyCounter)*defender.getLives() > 5) {
       score+=200-(5*buyCounter)*defender.getLives();
@@ -107,7 +107,7 @@ void bonusScore() {
   }
 }
 
-void resetToMenu() {
+public void resetToMenu() {
   sounds.gameMusic.stop();
   menu = true;
   if (sounds.getPlayDeathSound()) {
@@ -117,7 +117,7 @@ void resetToMenu() {
   delay(500);
 }
 
-boolean areAliensAllDead() { // Source: Michael Gerber - see readme)
+public boolean areAliensAllDead() { // Source: Michael Gerber - see readme)
   for (Alien a : aliens) {
     //"The way I did it, it will cycle through the list and as soon as one is alive,
     //it will return false and stop the whole for loop and ignore the rest of the list (Better optimized for large lists)"
@@ -128,7 +128,7 @@ boolean areAliensAllDead() { // Source: Michael Gerber - see readme)
   return true;
 }
 
-void mousePressed() {
+public void mousePressed() {
   if (mouseButton == LEFT && focused && !menu && !(isHost || isClient)) {
     if (!defender.getBullet().getFire()) {
       defender.getBullet().setFire(true);
@@ -149,13 +149,13 @@ void mousePressed() {
   }
 }
 
-void mouseClicked() {
+public void mouseClicked() {
   if (mouseButton == RIGHT && !menu) {
     buyLivesWithScore();
   }
 }
 
-void keyReleased() {
+public void keyReleased() {
   if (keyCode == 97) {
     if (debug == true) {
       debug = false;
@@ -178,7 +178,7 @@ void keyReleased() {
 
 //Source: https://forum.processing.org/one/topic/ignore-escape-key-do-other-action.html
 
-void keyPressed() {
+public void keyPressed() {
   if (key == ESC && !menu) {
     userInterface.quitGame();
   }
