@@ -108,72 +108,74 @@ public class Multiplayer {
   }
 
   public String generateClientData() {
-    String dataToSend;
+    String d;//DATA TO SEND
     //all positional floats have been converted to be proportianal to the display. ie, pos x at 800 of a 1000 wide display, is 0.8
-    dataToSend = "begin.main ";//index 0
-    dataToSend = dataToSend.concat(defender.getLives() + " ");//index 1
-    dataToSend = dataToSend.concat(defender.getMaxLives() + " ");//index 2
-    dataToSend = dataToSend.concat(buyCounter + " ");//index 3
-    dataToSend = dataToSend.concat(score + " ");//index 4
-    dataToSend = dataToSend.concat(numberOfAliens + " ");//index 5
-    dataToSend = dataToSend.concat(debug + " ");//index 6
-    dataToSend = dataToSend.concat(frameCount + " ");//index 7
-    dataToSend = dataToSend.concat("end.main ");//index 8      //frame count will be used to adjust for correct deathFrame in each alien to maintain sync.
-    dataToSend = dataToSend.concat("\nbegin.clientplayer ");//index 9
-    dataToSend = dataToSend.concat((defender.getDefenderX()/displayWidth) + " ");//index 10
-    dataToSend = dataToSend.concat((defender.getDefenderY()/displayHeight) + " ");//index 11
-    dataToSend = dataToSend.concat(defender.getHitCooldown() + " ");//index 12
-    dataToSend = dataToSend.concat(defender.getIsVisible() + " ");//index 13
-    dataToSend = dataToSend.concat(defender.getTargetHit() + " ");//index 14
-    dataToSend = dataToSend.concat(defender.getBullet().getBulletX()/displayWidth + " "); //index 15
-    dataToSend = dataToSend.concat(defender.getBullet().getBulletY()/displayHeight + " "); //index 16
-    dataToSend = dataToSend.concat(defender.getBullet().getFire() + " "); //index 17
-    dataToSend = dataToSend.concat("end.clientplayer ");//index 18
-    // lag? correctNumberOfAliens(); // forces a recheck of how many aliens there should be to maintain sync between client and server
-    //As a new alien may not have been created yet or an old alien may not have been removed
-    return dataToSend;
+    d = "begin.main ";//index 0
+    d = d.concat(defender.getLives() + " ");//index 1
+    d = d.concat(score + " ");//index 2
+    d = d.concat(numberOfAliens + " ");//index 3
+    d = d.concat("end.main ");//index 4
+    d = d.concat("\nbegin.clientplayer ");//index 5
+    d = d.concat((defender.getDefenderX()/displayWidth) + " ");//index 6
+    d = d.concat((defender.getDefenderY()/displayHeight) + " ");//index 7
+    d = d.concat(defender.getHitCooldown() + " ");//index 8
+    d = d.concat(defender.getIsVisible() + " ");//index 9
+    d = d.concat(defender.getTargetHit() + " ");//index 10
+    d = d.concat(defender.getBullet().getBulletX()/displayWidth + " "); //index 11
+    d = d.concat(defender.getBullet().getBulletY()/displayHeight + " "); //index 12
+    d = d.concat(defender.getBullet().getFire() + " "); //index 13
+    d = d.concat("end.clientplayer ");//index 14
+    if (aliens.size() != numberOfAliens) {
+      correctNumberOfAliens(); // forces a recheck of how many aliens there should be to maintain sync between client and server
+      //As a new alien may not have been created yet or an old alien may not have been removed
+    }
+    return d;
   }
 
-  //public String generateServerData() {
-  //  String dataToSend;
-  //  //all positional floats have been converted to be proportianal to the display. ie, pos x at 800 of a 1000 wide display, is 0.8
-  //  dataToSend = "begin.main ";//index 0
-  //  dataToSend = dataToSend.concat(defender.getLives() + " ");//index 1
-  //  dataToSend = dataToSend.concat(defender.getMaxLives() + " ");//index 2
-  //  dataToSend = dataToSend.concat(buyCounter + " ");//index 3
-  //  dataToSend = dataToSend.concat(score + " ");//index 4
-  //  dataToSend = dataToSend.concat(numberOfAliens + " ");//index 5
-  //  dataToSend = dataToSend.concat(debug + " ");//index 6
-  //  dataToSend = dataToSend.concat(frameCount + " ");//index 7
-  //  dataToSend = dataToSend.concat("end.main ");//index 8      //will be used to adjust for correct deathFrame in each alien to maintain sync.
-  //  dataToSend = dataToSend.concat("\nbegin.serverplayer ");//index 9
-  //  dataToSend = dataToSend.concat((defender.getDefenderX()/displayWidth) + " ");//index 10
-  //  dataToSend = dataToSend.concat((defender.getDefenderY()/displayHeight) + " ");//index 11
-  //  dataToSend = dataToSend.concat(defender.getHitCooldown() + " ");//index 12
-  //  dataToSend = dataToSend.concat(defender.getIsVisible() + " ");//index 13
-  //  dataToSend = dataToSend.concat(defender.getTargetHit() + " ");//index 14
-  //  dataToSend = dataToSend.concat("end.serverplayer ");//index 15
-  //  correctNumberOfAliens(); // forces a recheck of how many aliens there should be to maintain sync between client and server
-  //  //As a new alien may not have been created yet or an old alien may not have been removed
-  //  for (Alien a : aliens) {//iterate through each alien and add their variables to the string
-  //    //variable indexes, will have to test alien number of each list of strings
-  //    dataToSend = dataToSend.concat("\nbegin.alien."+ a.getAlienNumber() + " ");
-  //    dataToSend = dataToSend.concat((a.getAlienBullet().getAlienBulletX()/displayWidth) + " ");
-  //    dataToSend = dataToSend.concat((a.getAlienBullet().getAlienBulletY()/displayHeight) + " ");
-  //    dataToSend = dataToSend.concat(a.getAlienBullet().getFiring() + " ");
-  //    dataToSend = dataToSend.concat(a.getAlienBullet().getHitPlayer() + " ");
-  //    dataToSend = dataToSend.concat(a.getAlienDeathState() + " ");
-  //    dataToSend = dataToSend.concat((a.getAlienX()/displayWidth) + " ");
-  //    dataToSend = dataToSend.concat((a.getAlienY()/displayHeight) + " ");
-  //    dataToSend = dataToSend.concat(a.getDeathFrame() + " ");
-  //    dataToSend = dataToSend.concat(a.getDirectionIsRight() + " ");
-  //    dataToSend = dataToSend.concat(a.getExplosionSize() + " ");
-  //    dataToSend = dataToSend.concat(a.getHits() + " ");
-  //    dataToSend = dataToSend.concat(a.getMaxHits() + " ");
-  //    dataToSend = dataToSend.concat("end.alien."+ a.getAlienNumber()+" ");
-  //  }
-  //  return dataToSend;
-  //}
+  public String generateServerData() {
+    String d;//DATA TO SEND
+    //all positional floats have been converted to be proportianal to the display. ie, pos x at 800 of a 1000 wide display, is 0.8
+    d = "begin.main ";//index 0
+    d = d.concat(defender.getLives() + " ");//index 1
+    d = d.concat(defender.getMaxLives() + " ");//index 2
+    d = d.concat(buyCounter + " ");//index 3
+    d = d.concat(score + " ");//index 4
+    d = d.concat(numberOfAliens + " ");//index 5
+    d = d.concat(debug + " ");//index 6
+    d = d.concat(frameCount + " ");//index 7
+    d = d.concat("end.main ");//index 8      //will be used to adjust for correct deathFrame in each alien to maintain sync.
+    d = d.concat("\nbegin.serverplayer ");//index 9
+    d = d.concat((defender.getDefenderX()/displayWidth) + " ");//index 10
+    d = d.concat((defender.getDefenderY()/displayHeight) + " ");//index 11
+    d = d.concat(defender.getHitCooldown() + " ");//index 12
+    d = d.concat(defender.getIsVisible() + " ");//index 13
+    d = d.concat(defender.getTargetHit() + " ");//index 14
+    d = d.concat("end.serverplayer ");//index 15
+    d = d.concat("begin.clientplayer ");//index 16
+    d = d.concat(defenderTwo.getTargetHit() + " ");
+    if (aliens.size() != numberOfAliens) {
+      correctNumberOfAliens(); // forces a recheck of how many aliens there should be to maintain sync between client and server
+      //As a new alien may not have been created yet or an old alien may not have been removed
+    }
+    for (Alien a : aliens) {//iterate through each alien and add their variables to the string
+      //variable indexes, will have to test alien number of each list of strings
+      d = d.concat("\nbegin.alien."+ a.getAlienNumber() + " ");
+      d = d.concat((a.getAlienBullet().getAlienBulletX()/displayWidth) + " ");
+      d = d.concat((a.getAlienBullet().getAlienBulletY()/displayHeight) + " ");
+      d = d.concat(a.getAlienBullet().getFiring() + " ");
+      d = d.concat(a.getAlienBullet().getHitPlayer() + " ");
+      d = d.concat(a.getAlienDeathState() + " ");
+      d = d.concat((a.getAlienX()/displayWidth) + " ");
+      d = d.concat((a.getAlienY()/displayHeight) + " ");
+      d = d.concat(a.getDeathFrame() + " ");
+      d = d.concat(a.getDirectionIsRight() + " ");
+      d = d.concat(a.getExplosionSize() + " ");
+      d = d.concat(a.getHits() + " ");
+      d = d.concat(a.getMaxHits() + " ");
+      d = d.concat("end.alien."+ a.getAlienNumber()+" ");
+    }
+    return d;
+  }
 
   public void parseReceivedClientData() {
     String rawDataReceived = multiplayer.gameClient.readString();

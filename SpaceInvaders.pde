@@ -45,7 +45,7 @@ public void setup() {
   background(0);
   noStroke();
   noCursor();
-  multiplayerEnabled = false;
+  multiplayerEnabled = true;
   debug = false;
   menu = true;
   isHost = false;
@@ -74,16 +74,16 @@ public void draw() {
 }
 
 void correctNumberOfAliens() {
-  if (aliens.size()<numberOfAliens) {
-    for (int i = aliens.size(); i < numberOfAliens; i++) {//when there are fewer aliens than there should be;
-      aliens.add(new Alien(i));//adds another alien to the list
-    }
+  boolean clearedGarbage = false;
+  while (aliens.size()<numberOfAliens) {
+    aliens.add(new Alien(aliens.size()));
   }
-  if (aliens.size()>numberOfAliens) {
-    for (int i = aliens.size(); i > numberOfAliens; i--) {//when there are more aliens than there should be
-      aliens.remove(i-1);//removes last alien from the list
+  while (aliens.size()>numberOfAliens) {
+    aliens.remove(aliens.size()-1);
+    if (!clearedGarbage && aliens.size() == numberOfAliens) {
+      instance.gc();//for good measure, should I even bother?
+      clearedGarbage = true;
     }
-    instance.gc();
   }
 }
 
@@ -216,7 +216,7 @@ public void server() {
         defenderTwo = new Defender(true);//create player two (client is player two)
       } else if (multiplayer.gameClient.available()>0) {//check there is a client connected and data is received
         multiplayer.parseReceivedClientData(); //server side parsing of client's data.
-        //gameServer.write(generateServerData());
+        multiplayer.gameServer.write(multiplayer.generateServerData());
       } else {
         println("received nothing");
       }
@@ -246,7 +246,7 @@ public void client() {
       if (!multiplayer.getConnected() && multiplayer.gameClient.active()) {
         multiplayer.setConnected(true);
         defenderTwo = new Defender(true);//create player one (server is player one)
-        thread("clientSender");//send the first piece of the pie! (send the first data, so the server see's a client is connected and active etc.)
+        multiplayer.gameClient.write(multiplayer.generateClientData());//send the first piece of the pie! (send the first data, so the server see's a client is connected and active etc.)
         println("Connected to: " + serverIP + ":" + port);
       } else if (multiplayer.gameClient.available()>0) {//should only run when the client receives data.
         //parsReceivedServerData(gameClient.readString());//client side parsing of server's data
