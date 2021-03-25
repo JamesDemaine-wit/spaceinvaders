@@ -1,7 +1,5 @@
 /*
 Name : James Demaine
- Student Number:  20093118  
- Course Name: Applied Computing General Y1 Group W1
  
  Brief description of the animation achieved: A modernised clone of Space Invaders
  
